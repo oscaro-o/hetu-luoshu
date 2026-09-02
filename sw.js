@@ -1,5 +1,5 @@
 /* 河图洛书 PWA service worker — app-shell cache, offline-first */
-var VERSION = "v1";
+var VERSION = "v2";
 var CACHE = "hetu-luoshu-" + VERSION;
 var SHELL = [
   "./",
@@ -36,6 +36,9 @@ self.addEventListener("fetch", function (e) {
   if (req.method !== "GET") return;
   var url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+
+  // 埋点信标：放行到网络，不拦截也不缓存。
+  if (url.pathname.indexOf("/_e/") === 0) return;
 
   // Navigations: network first (so updates land), fall back to cached shell offline.
   if (req.mode === "navigate") {

@@ -472,7 +472,7 @@ L.zh = {
   s5_r3:"你手里这张图，戴九履一，左三右七，二四为肩，六八为足。",
   s5_close:"合上",
   end_spin:"八个变体，转着转着就转回来了。", end_stop:"定格。",
-  end_t1:"用时", end_t2:"认输", end_t3:"无效摆放", end_unit:"次",
+  end_t1:"用时", end_t2:"认输", end_t3:"无效摆放", end_t4:"自主完成", end_unit:"次",
   end_line:"四千年前，有人也停在了这里。",
   end_p1:"八个解全部自动满足你那两条象数规矩——阴阳对冲、五行同族相邻。象数的语言和「横竖斜皆十五」，描述的是同一个结构。",
   end_p2:"下一场，你要给这两张图取名字。",
@@ -640,7 +640,7 @@ L.hant = {
   s5_r3:"你手裏這張圖，戴九履一，左三右七，二四為肩，六八為足。",
   s5_close:"合上",
   end_spin:"八個變體，轉着轉着就轉回來了。", end_stop:"定格。",
-  end_t1:"用時", end_t2:"認輸", end_t3:"無效擺放", end_unit:"次",
+  end_t1:"用時", end_t2:"認輸", end_t3:"無效擺放", end_t4:"自主完成", end_unit:"次",
   end_line:"四千年前，有人也停在了這裏。",
   end_p1:"八個解全部自動滿足你那兩條象數規矩——陰陽對沖、五行同族相鄰。象數的語言和「橫豎斜皆十五」，描述的是同一個結構。",
   end_p2:"下一場，你要給這兩張圖取名字。",
@@ -805,7 +805,7 @@ L.en = {
   s5_r3:"Nine on the head and one underfoot; three on the left, seven on the right; two and four are the shoulders, six and eight the feet.",
   s5_close:"Close it",
   end_spin:"Eight variants — turn them enough and you come back.", end_stop:"Settled.",
-  end_t1:"Time", end_t2:"Gave up", end_t3:"Invalid moves", end_unit:"×",
+  end_t1:"Time", end_t2:"Gave up", end_t3:"Invalid moves", end_t4:"Unaided", end_unit:"×",
   end_line:"Four thousand years ago, somebody else stopped here too.",
   end_p1:"All eight solutions automatically satisfy both of your symbolic rules — yin-yang opposition and same-phase adjacency. The language of the ancients and “every line makes fifteen” describe the same structure.",
   end_p2:"In the next scene, you get to name these two diagrams.",
@@ -997,7 +997,7 @@ function a1Intro(){
   +  '<button class="btn" '+(picked?"":"disabled")+' onclick="go(\'a1_wall\')">'+t("start")+'</button>'
   +  '<button class="btn ghost small" onclick="pickWhy(1);go(\'a1_wall\')">'+t("skip")+'</button></div></div>';
 }
-function pickWhy(i){ S.why=i; if(!S.t0) S.t0=Date.now(); render(); }
+function pickWhy(i){ S.why=i; if(!S.t0){ S.t0=Date.now(); trackFirst("start",{w:i}); } render(); }
 
 function wallHTML(){
   var h='<div class="wall">';
@@ -1471,6 +1471,7 @@ function maybeAuto(){
 }
 function giveUp(){
   S.giveUps++;
+  track("giveup",{sc:S.scene,i:S.giveUps});
   var keys=(S.scene==="a3_s2")?["R1","R2","R3","R4"]:["R5","R6"];
   var badK=keys.filter(function(k){return ruleState(k)==="bad";});
   var pend=keys.filter(function(k){return ruleState(k)==="pending";});
@@ -1557,6 +1558,13 @@ function fmtTime(ms){
   var s=Math.max(0,Math.round(ms/1000)), m=Math.floor(s/60); s=s%60;
   return LANG!=="en" ? (m+" 分 "+(s<10?"0":"")+s+" 秒") : (m+"m "+(s<10?"0":"")+s+"s");
 }
+/* 自主完成率：全局 9 个格子，每认输 1 次扣 1 格。下限 0。 */
+var TOTAL_STEPS=9;
+function soloRate(){
+  var r=(TOTAL_STEPS-S.giveUps)/TOTAL_STEPS;
+  if(r<0) r=0;
+  return Math.round(r*100);
+}
 function a3End(){
   return '<div class="scene center fin">'
   +'<div id="spin" style="max-width:340px;margin:0 auto">'+compass(boardSVG(CAND_YI,{showNum:S.showNum}))+'</div>'
@@ -1564,7 +1572,8 @@ function a3End(){
   +'<div class="stats" style="justify-content:center">'
   +'<div class="stat"><div class="k">'+t("end_t1")+'</div><div class="v">'+fmtTime(Date.now()-(S.t0||Date.now()))+'</div></div>'
   +'<div class="stat"><div class="k">'+t("end_t2")+'</div><div class="v">'+S.giveUps+' <small>'+t("end_unit")+'</small></div></div>'
-  +'<div class="stat"><div class="k">'+t("end_t3")+'</div><div class="v">'+S.bad+' <small>'+t("end_unit")+'</small></div></div></div>'
+  +'<div class="stat"><div class="k">'+t("end_t3")+'</div><div class="v">'+S.bad+' <small>'+t("end_unit")+'</small></div></div>'
+  +'<div class="stat"><div class="k">'+t("end_t4")+'</div><div class="v">'+soloRate()+'<small>%</small></div></div></div>'
   +'<p class="big" id="endline" style="opacity:0">'+t("end_line")+'</p><hr class="rule2">'
   +'<p class="muted">'+tag("ke")+t("end_p1")+'</p>'
   +'<p class="quote" style="text-align:left;display:inline-block">'+t("end_p2")+'</p>'
@@ -1593,6 +1602,7 @@ function startSpin(){
   },620);
 }
 function restart(){
+  track("restart");
   if(spinTimer){clearInterval(spinTimer);spinTimer=null;}
   if(ringTimer){clearInterval(ringTimer);ringTimer=null;}
   S.scene="a1_intro"; S.why=null;
@@ -1618,7 +1628,13 @@ var SUBK={a1_intro:"a1sub0",a1_wall:"a1sub1",a1_cast:"a1sub2",a1_fin:"a1sub3",
   a2_main:"a2sub",a3_intro:"a3sub0",a3_s1:"a3sub1",a3_s2:"a3sub2",a3_s3:"a3sub3",
   a3_s4:"a3sub4",a3_s5:"a3sub5",a3_end:"a3sub6"};
 
-function go(scene){ S.scene=scene; render(); window.scrollTo({top:0,behavior:"smooth"}); }
+function go(scene){
+  S.scene=scene;
+  trackFirst("sc_"+scene);
+  if(scene==="a3_end") trackFirst("done",{g:S.giveUps,b:S.bad,r:soloRate()});
+  render();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
 var HTML_LANG={zh:"zh-Hans",hant:"zh-Hant-HK",en:"en"};
 function applyLang(){
   document.body.className=(LANG==="en")?"en":"";
@@ -1627,6 +1643,7 @@ function applyLang(){
 function setLang(code){
   if(!L[code]||code===LANG) return;
   LANG=code;
+  track("lang",{to:code});
   try{ localStorage.setItem("hltl_lang",code); }catch(e){}
   applyLang();
   render();
@@ -1717,20 +1734,80 @@ function bindBoard(){
 applyLang();
 render();
 
+/* =========================================================
+   9 · 埋点 · 静态信标
+   事件写进查询参数，服务器访问日志自动记录。
+   不写 cookie，不加载外部脚本，不收集个人信息。
+   换后端只需要改 send() 一个函数。
+   ========================================================= */
+var TRACK_ON=/(^|\.)trilumi\.xyz$/.test(location.hostname);
+var TRACK_URL="/_e/p.gif";
+var trackOnce={};
+var SID=(function(){
+  try{
+    var v=sessionStorage.getItem("hltl_sid");
+    if(!v){ v=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+            sessionStorage.setItem("hltl_sid",v); }
+    return v;
+  }catch(e){ return "n"+Math.random().toString(36).slice(2,8); }
+})();
+function send(ev,extra){
+  var q="?e="+encodeURIComponent(ev)+"&s="+SID+"&l="+LANG;
+  if(extra){ for(var k in extra) q+="&"+k+"="+encodeURIComponent(extra[k]); }
+  try{ new Image().src=TRACK_URL+q+"&_="+Date.now(); }catch(e){}
+}
+function track(ev,extra){ if(TRACK_ON) send(ev,extra); }
+function trackFirst(ev,extra){
+  if(!trackOnce) trackOnce={};
+  if(trackOnce[ev]) return;
+  trackOnce[ev]=1;
+  track(ev,extra);
+}
+function refHost(){
+  try{
+    if(!document.referrer) return "direct";
+    var h=new URL(document.referrer).hostname;
+    return (h===location.hostname)?"self":h;
+  }catch(e){ return "unknown"; }
+}
+function newVisitor(){
+  try{
+    if(localStorage.getItem("hltl_seen")) return 0;
+    localStorage.setItem("hltl_seen","1");
+    return 1;
+  }catch(e){ return 1; }
+}
+(function(){
+  if(!TRACK_ON) return;
+  var pwa=false;
+  try{ pwa=window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true; }catch(e){}
+  var d={r:refHost(),n:newVisitor(),m:pwa?"pwa":"web"};
+  try{
+    var u=new URLSearchParams(location.search).get("utm_source");
+    if(u) d.u=u;
+  }catch(e){}
+  track("load",d);
+  trackFirst("sc_"+S.scene);
+})();
+
 /* ===== PWA: service worker + install prompt ===== */
 var deferredPrompt=null;
 window.addEventListener("beforeinstallprompt",function(e){
   e.preventDefault(); deferredPrompt=e;
+  trackFirst("install_prompt");
   var b=el("installbtn"); if(b) b.className="installbtn show";
 });
 window.addEventListener("appinstalled",function(){
+  trackFirst("installed");
   deferredPrompt=null;
   var b=el("installbtn"); if(b) b.className="installbtn";
 });
 function doInstall(){
   if(!deferredPrompt) return;
+  track("install_click");
   deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(function(){
+  deferredPrompt.userChoice.then(function(c){
+    track("install_choice",{o:(c&&c.outcome)||"unknown"});
     deferredPrompt=null;
     var b=el("installbtn"); if(b) b.className="installbtn";
   });
