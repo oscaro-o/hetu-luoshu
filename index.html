@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>「发明」河图洛书 · 第一至第三场</title>
+<meta name="description" content="An interactive game about inventing the He Tu / Lo Shu magic square. 繁體 · 简体 · English.">
+<style>
+:root{
+  --paper:#f4efe4; --paper2:#fbf8f1; --ink:#1c1a17; --ink2:#4a453d; --ink3:#7d7566;
+  --line:#d6cdb9; --zhu:#9e2b25; --qing:#2c5f5d; --gold:#a8853f; --ok:#3f7a55;
+  --serif:"Songti SC","Songti TC","Source Han Serif SC","Source Han Serif TC","Noto Serif CJK SC","Noto Serif CJK TC","SimSun","PMingLiU","STSong",Georgia,"Times New Roman",serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink); font-family:var(--serif);
+  font-size:16px; line-height:1.85; letter-spacing:.01em;
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(168,133,63,.055), transparent 42%),
+    radial-gradient(circle at 82% 78%, rgba(44,95,93,.05), transparent 46%);
+  min-height:100vh;
+}
+body.en{letter-spacing:0;line-height:1.7}
+.wrap{max-width:1000px;margin:0 auto;padding:22px 18px 80px}
+header.top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:22px}
+header.top h1{font-size:19px;margin:0;font-weight:600;letter-spacing:.14em}
+body.en header.top h1{letter-spacing:.04em}
+header.top .sub{color:var(--ink3);font-size:13px;letter-spacing:.08em}
+header.top .spacer{flex:1}
+.stepdots{display:flex;gap:7px;align-items:center}
+.stepdots i{width:7px;height:7px;border-radius:50%;background:var(--line);display:block;transition:.4s}
+.stepdots i.on{background:var(--zhu);transform:scale(1.35)}
+.stepdots i.done{background:var(--ink3)}
+.langsw{display:inline-flex;border:1px solid var(--line);border-radius:2px;overflow:hidden}
+.langsw button{font-family:var(--serif);font-size:12px;letter-spacing:.1em;background:transparent;border:none;
+  border-right:1px solid var(--line);color:var(--ink3);padding:4px 11px;cursor:pointer;transition:.18s;line-height:1.5}
+.langsw button:last-child{border-right:none}
+.langsw button:hover{color:var(--zhu)}
+.langsw button.on{background:var(--ink);color:var(--paper2)}
+.actbar{display:flex;gap:0;margin-bottom:18px;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.actbar div{flex:1;padding:7px 8px;font-size:12px;letter-spacing:.1em;color:var(--ink3);text-align:center;
+  background:var(--paper2);border-right:1px solid var(--line);transition:.3s}
+.actbar div:last-child{border-right:none}
+.actbar div.on{background:var(--ink);color:var(--paper2)}
+.actbar div.done{color:var(--ink2)}
+
+.scene{animation:fade .55s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h2.act{font-size:15px;letter-spacing:.3em;color:var(--zhu);margin:0 0 6px;font-weight:600}
+body.en h2.act{letter-spacing:.16em}
+h3.tt{font-size:25px;margin:0 0 16px;font-weight:600;letter-spacing:.06em}
+body.en h3.tt{letter-spacing:0}
+p{margin:0 0 13px}
+.narr{max-width:36em;color:var(--ink2);font-size:16.5px}
+body.en .narr{max-width:40em;font-size:16px}
+.narr strong{color:var(--ink);font-weight:600}
+.muted{color:var(--ink3);font-size:14px}
+
+.tag{display:inline-block;font-size:11px;line-height:1.5;letter-spacing:.06em;padding:1px 5px;border-radius:2px;
+  vertical-align:.12em;margin-right:5px;white-space:nowrap;font-weight:600;border:1px solid}
+.t-ke{color:var(--qing);border-color:rgba(44,95,93,.42);background:rgba(44,95,93,.075)}
+.t-gu{color:var(--gold);border-color:rgba(168,133,63,.45);background:rgba(168,133,63,.085)}
+.t-jin{color:var(--ink3);border-color:rgba(125,117,102,.42);background:rgba(125,117,102,.075)}
+
+button{font-family:var(--serif);cursor:pointer}
+.btn{background:var(--ink);color:var(--paper2);border:none;padding:10px 24px;border-radius:2px;font-size:15px;
+  letter-spacing:.14em;transition:.2s;box-shadow:0 1px 0 rgba(0,0,0,.18)}
+body.en .btn{letter-spacing:.05em}
+.btn:hover{background:var(--zhu)}
+.btn:disabled{opacity:.32;cursor:default;background:var(--ink3)}
+.btn.ghost{background:transparent;color:var(--ink3);border:1px solid var(--line);box-shadow:none}
+.btn.ghost:hover{color:var(--zhu);border-color:var(--zhu);background:transparent}
+.btn.small{padding:6px 14px;font-size:13px;letter-spacing:.1em}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:18px}
+
+.play{display:flex;gap:26px;align-items:flex-start;margin-top:14px}
+.play .boardcol{flex:1 1 380px;min-width:0;max-width:460px}
+.play .side{flex:0 0 300px;max-width:330px}
+@media(max-width:840px){ .play{flex-direction:column} .play .side{flex:1 1 auto;width:100%;max-width:none} .play .boardcol{max-width:none;width:100%} }
+
+.compass{display:grid;grid-template-columns:26px 1fr 26px;grid-template-rows:24px 1fr 24px;align-items:center;justify-items:center;gap:2px}
+.compass .cn{font-size:13px;color:var(--ink3);letter-spacing:.2em}
+body.en .compass .cn{font-size:11px;letter-spacing:.06em}
+.compass .bd{grid-column:2;grid-row:2;width:100%}
+.compass .n-s{grid-column:2;grid-row:1} .compass .n-n{grid-column:2;grid-row:3}
+.compass .n-e{grid-column:1;grid-row:2} .compass .n-w{grid-column:3;grid-row:2}
+svg.board{width:100%;height:auto;display:block;overflow:visible}
+svg text{font-family:var(--serif)}
+
+.tray{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;padding:12px;border:1px dashed var(--line);border-radius:3px;background:rgba(251,248,241,.6);min-height:74px;align-items:center}
+.tray .lab{font-size:12px;color:var(--ink3);letter-spacing:.18em;width:100%;margin-bottom:-2px}
+.chip{width:56px;height:56px;border:1px solid var(--line);background:var(--paper2);border-radius:3px;display:flex;
+  align-items:center;justify-content:center;cursor:pointer;transition:.16s;padding:0;position:relative}
+.chip:hover{border-color:var(--ink3);transform:translateY(-2px)}
+.chip.sel{border-color:var(--zhu);border-width:2px;box-shadow:0 0 0 3px rgba(158,43,37,.13);transform:translateY(-2px)}
+.chip svg{width:40px;height:40px;display:block}
+.chip .num{position:absolute;right:3px;bottom:0;font-size:10px;color:var(--ink3)}
+.tray.empty .lab{opacity:.5}
+
+.rules{border:1px solid var(--line);background:var(--paper2);border-radius:3px;padding:14px 15px}
+.rules h4{margin:0 0 10px;font-size:13px;letter-spacing:.22em;color:var(--ink3);font-weight:600}
+.rule{display:flex;gap:9px;align-items:flex-start;padding:8px 0;border-top:1px solid rgba(214,205,185,.6);font-size:14px;line-height:1.6;transition:.3s}
+.rule:first-of-type{border-top:none}
+.rule .mk{flex:0 0 15px;text-align:center;color:var(--line);font-size:13px;line-height:1.6;transition:.3s}
+.rule .txt{flex:1;color:var(--ink2)}
+.rule.pending{opacity:.5;transform:translateY(2px)}
+.rule.good .mk{color:var(--ok)} .rule.good .txt{color:var(--ink)}
+.rule.bad .mk{color:var(--zhu)} .rule.bad .txt{color:var(--zhu)}
+@keyframes pulseBad{0%,100%{background:transparent}30%{background:rgba(158,43,37,.14)}}
+.rule.pulse{animation:pulseBad .85s ease 2}
+.sysline{margin-top:12px;font-size:13.5px;color:var(--ink3);min-height:1.6em}
+.sysline.warn{color:var(--zhu)}
+
+.aside{margin-top:14px;border-left:2px solid var(--gold);background:rgba(168,133,63,.06);padding:10px 14px;border-radius:0 3px 3px 0;font-size:14px;color:var(--ink2)}
+.aside .hd{cursor:pointer;color:var(--gold);letter-spacing:.1em;font-size:13px;user-select:none}
+.aside .bd2{margin-top:8px;display:none}
+.aside.open .bd2{display:block}
+
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px}
+.switch{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--ink3);cursor:pointer;user-select:none}
+.switch input{accent-color:var(--zhu);width:15px;height:15px;cursor:pointer}
+
+.pair{display:flex;gap:22px;flex-wrap:wrap;margin-top:18px}
+.cand{flex:1 1 320px;min-width:290px;border:1px solid var(--line);background:var(--paper2);padding:14px 14px 10px;border-radius:3px;transition:.5s}
+.cand h5{margin:0 0 4px;font-size:15px;letter-spacing:.16em;font-weight:600}
+.cand .mine{font-size:11px;color:var(--zhu);letter-spacing:.14em;border:1px solid rgba(158,43,37,.4);padding:1px 6px;border-radius:2px;margin-left:8px;vertical-align:2px}
+.cand .verdict{margin-top:8px;font-size:14px;min-height:1.7em;letter-spacing:.04em}
+.cand.fail{opacity:.55;filter:grayscale(.35)}
+.cand.win{border-color:var(--ok);box-shadow:0 0 0 2px rgba(63,122,85,.18)}
+.cand .verdict.no{color:var(--zhu)} .cand .verdict.yes{color:var(--ok)}
+
+.quote{border-left:2px solid var(--line);padding:2px 0 2px 16px;margin:16px 0;color:var(--ink2);font-size:16px}
+.big{font-size:19px;line-height:1.9;letter-spacing:.05em}
+body.en .big{letter-spacing:0;line-height:1.75}
+
+.stats{display:flex;gap:30px;flex-wrap:wrap;margin:20px 0;padding:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.stat .k{font-size:12px;color:var(--ink3);letter-spacing:.2em}
+.stat .v{font-size:27px;letter-spacing:.04em;line-height:1.3}
+.stat .v small{font-size:14px;color:var(--ink3);letter-spacing:0}
+.center{text-align:center}
+.fin{max-width:460px;margin:0 auto}
+@keyframes softin{from{opacity:0}to{opacity:1}}
+.softin{animation:softin .8s ease both}
+hr.rule2{border:none;border-top:1px solid var(--line);margin:26px 0}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-3px)}40%{transform:translateX(3px)}60%{transform:translateX(-2px)}80%{transform:translateX(2px)}}
+.shake{animation:shake .4s ease}
+
+/* ===== 第一场：记账墙 ===== */
+.wall{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0;padding:16px 14px;border:1px solid var(--line);
+  background:linear-gradient(#fbf8f1,#f2ecdf);border-radius:3px}
+.day{flex:1 1 78px;min-width:70px;text-align:center}
+.day .dl{font-size:11px;color:var(--ink3);letter-spacing:.1em;margin-bottom:4px}
+.day .slot{height:60px;border:1px dashed var(--line);border-radius:3px;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.35);cursor:pointer;transition:.16s}
+.day .slot:hover{border-color:var(--ink3)}
+.day .slot.filled{border-style:solid;border-color:var(--line);cursor:default}
+.day .slot svg{width:34px;height:34px}
+.day .truth{font-size:11px;color:var(--ink3);margin-top:3px;min-height:1.4em}
+.day.hit .truth{color:var(--ok)} .day.miss .truth{color:var(--zhu)}
+.wangbox{border:1px solid var(--line);background:var(--paper2);border-radius:3px;padding:14px 16px;margin-top:16px}
+.wangbox .who{font-size:12px;letter-spacing:.2em;color:var(--gold);margin-bottom:6px}
+.wangbox .say{font-size:16.5px;color:var(--ink2);min-height:1.8em}
+.toolslot{display:flex;gap:12px;align-items:center;margin-top:14px;flex-wrap:wrap}
+.toolslot .tk{width:52px;height:52px;border:1px solid var(--line);background:var(--paper2);border-radius:3px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.16s;position:relative}
+.toolslot .tk.sel{border-color:var(--zhu);border-width:2px;box-shadow:0 0 0 3px rgba(158,43,37,.13)}
+.toolslot .tk.locked{opacity:.28;cursor:default}
+.toolslot .tk svg{width:34px;height:34px}
+.toolslot .tn{font-size:12px;color:var(--ink3);letter-spacing:.1em}
+
+/* ===== 第一场：万物海选 ===== */
+.castwrap{margin-top:8px}
+.crit{border:1px solid var(--line);background:var(--paper2);border-radius:3px;padding:12px 14px;margin-bottom:14px}
+.crit h4{margin:0 0 8px;font-size:12.5px;letter-spacing:.2em;color:var(--ink3);font-weight:600}
+.crit li{font-size:14px;color:var(--ink2);margin:3px 0;list-style:none;padding-left:16px;position:relative}
+.crit li:before{content:"·";position:absolute;left:4px;color:var(--zhu)}
+.opts{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+.opt{flex:1 1 120px;min-width:112px;border:1px solid var(--line);background:var(--paper2);border-radius:3px;
+  padding:14px 10px 12px;text-align:center;cursor:pointer;transition:.2s;position:relative}
+.opt:hover{border-color:var(--ink3);transform:translateY(-2px)}
+.opt .gl{display:block;line-height:1;margin-bottom:4px}
+.opt .gl svg{display:inline-block;vertical-align:middle}
+.opt .nm{font-size:15px;letter-spacing:.1em;margin-top:2px}
+.opt .rs{font-size:12.5px;color:var(--zhu);margin-top:6px;line-height:1.5;min-height:1em}
+.opt.out{opacity:.42;cursor:default;transform:none;border-style:dashed}
+.opt.out:hover{transform:none;border-color:var(--line)}
+.opt.win{border-color:var(--ok);border-width:2px;box-shadow:0 0 0 3px rgba(63,122,85,.14)}
+.opt.win .rs{color:var(--ok)}
+.stepbadge{display:inline-block;font-size:11.5px;letter-spacing:.16em;color:var(--ink3);border:1px solid var(--line);
+  padding:1px 8px;border-radius:2px;margin-bottom:8px}
+.combo{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:10px 0 4px}
+.combo .cell{width:74px;height:74px;border:1px solid var(--line);background:var(--paper2);border-radius:3px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.18s}
+.combo .cell.sel{border-color:var(--zhu);border-width:2px}
+.combo .cell.dim{opacity:.35;cursor:default}
+.combo .cell svg{width:52px;height:52px}
+.combo .op{font-size:22px;color:var(--ink3)}
+.splitbox{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.splitbox .sc{border:1px solid var(--line);background:var(--paper2);border-radius:3px;padding:10px 14px;text-align:center}
+.splitbox .sc svg{width:64px;height:64px;display:block;margin:0 auto}
+.splitbox .sc .cap{font-size:12.5px;color:var(--ink3);margin-top:4px}
+.trybar{display:flex;gap:9px;flex-wrap:wrap;margin-top:10px}
+.trybar button{border:1px solid var(--line);background:var(--paper2);color:var(--ink2);padding:6px 13px;
+  border-radius:2px;font-size:13.5px;transition:.16s}
+.trybar button:hover{border-color:var(--zhu);color:var(--zhu)}
+.trybar button.tried{opacity:.4;cursor:default;border-style:dashed}
+
+/* ===== 第二场：＋五 ===== */
+.plusrows{border:1px solid var(--line);background:var(--paper2);border-radius:3px;overflow:hidden}
+.prow{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid rgba(214,205,185,.7);flex-wrap:wrap}
+.prow:last-child{border-bottom:none}
+.prow .g{flex:0 0 62px;display:flex;justify-content:center}
+.prow .g svg{width:56px;height:40px}
+.prow .arrow{color:var(--ink3);font-size:14px;letter-spacing:.06em;flex:0 0 auto}
+.prow .res{flex:0 0 76px;display:flex;justify-content:center;min-height:42px;align-items:center}
+.prow .res svg{width:72px;height:42px}
+.prow .note{flex:1 1 150px;font-size:13.5px;color:var(--ink3);min-width:120px}
+.prow.done .note{color:var(--ink2)}
+.pbtn{background:transparent;border:1px solid var(--zhu);color:var(--zhu);padding:5px 13px;border-radius:2px;
+  font-size:13.5px;letter-spacing:.08em;transition:.18s;white-space:nowrap}
+.pbtn:hover{background:var(--zhu);color:var(--paper2)}
+.pbtn:disabled{opacity:.3;border-color:var(--line);color:var(--ink3);background:transparent;cursor:default}
+.sumline{display:flex;gap:26px;flex-wrap:wrap;margin-top:16px;font-size:15px;color:var(--ink2)}
+.sumline b{color:var(--zhu);font-weight:600}
+
+/* ===== PWA ===== */
+.installbtn{font-family:var(--serif);font-size:12px;letter-spacing:.1em;background:transparent;
+  border:1px solid var(--gold);color:var(--gold);padding:4px 11px;border-radius:2px;cursor:pointer;
+  transition:.18s;display:none}
+.installbtn.show{display:inline-block}
+.installbtn:hover{background:var(--gold);color:var(--paper2)}
+@media(display-mode:standalone){
+  .wrap{padding-top:max(22px, env(safe-area-inset-top));
+        padding-left:max(18px, env(safe-area-inset-left));
+        padding-right:max(18px, env(safe-area-inset-right));
+        padding-bottom:max(80px, env(safe-area-inset-bottom))}
+}
+@media(max-width:480px){
+  header.top h1{font-size:16px;letter-spacing:.08em}
+  header.top{gap:8px}
+  .langsw button{padding:4px 9px}
+}
+</style>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#f4efe4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#f4efe4">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="河图洛书">
+<meta name="format-detection" content="telephone=no">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1 id="gtitle">「发明」河图洛书</h1>
+    <span class="sub" id="subtitle"></span>
+    <span class="spacer"></span>
+    <span class="stepdots" id="dots"></span>
+    <span class="langsw" id="langsw">
+      <button type="button" data-l="hant" onclick="setLang('hant')">繁</button>
+      <button type="button" data-l="zh" onclick="setLang('zh')">简</button>
+      <button type="button" data-l="en" onclick="setLang('en')">EN</button>
+    </span>
+    <button type="button" class="installbtn" id="installbtn" onclick="doInstall()"></button>
+  </header>
+  <div class="actbar" id="actbar"></div>
+  <div id="app"></div>
+</div>
+
+<script>
+"use strict";
+/* =========================================================
+   0 · 常量
+   ========================================================= */
+var SLOTS = ["SE","S","SW","E","C","W","NE","N","NW"];
+var SLOT_RC = {SE:[0,0],S:[0,1],SW:[0,2],E:[1,0],C:[1,1],W:[1,2],NE:[2,0],N:[2,1],NW:[2,2]};
+var OPP = {S:"N",N:"S",E:"W",W:"E",SE:"NW",NW:"SE",SW:"NE",NE:"SW"};
+var EDGES = ["S","N","E","W"];
+var CORNERS = ["SE","SW","NE","NW"];
+var CORNER_ADJ = {SE:["S","E"], SW:["S","W"], NE:["N","E"], NW:["N","W"]};
+var WX_MATE = {2:7,7:2,4:9,9:4,6:1,1:6,8:3,3:8};
+var CAND_JIA = {SE:8,S:9,SW:4,E:3,C:5,W:7,NE:6,N:1,NW:2};
+var CAND_YI  = {SE:4,S:9,SW:2,E:3,C:5,W:7,NE:8,N:1,NW:6};
+var DOTS = {1:[1],2:[2],3:[3],4:[2,2],5:[2,1,2],6:[3,3],7:[3,1,3],8:[4,4],9:[3,3,3],10:[5,5]};
+var WX_COLOR = {water:"#2c5f5d",fire:"#9e2b25",metal:"#8a8578",wood:"#3f7a55",earth:"#a8853f"};
+
+// 第一场：七天的真实收成（true=有）
+var DAYS = [true,true,false,false,false,true,true];
+
+// 第一场：五轮海选
+var CAST = [
+  {n:1, wx:"water", slot:"N", mode:"pick", opts:["sun","stone","tree","water"], ans:"water"},
+  {n:2, wx:"fire",  slot:"S", mode:"pick", opts:["cloud","moon","wind","fire"], ans:"fire"},
+  {n:3, wx:"wood",  slot:"E", mode:"combo"},
+  {n:4, wx:"metal", slot:"W", mode:"split"},
+  {n:5, wx:"earth", slot:"C", mode:"decomp"}
+];
+// 候选卡的小色点（monochrome 风格，不用 emoji，跟宣纸底色更搭）
+var OPT_HUE = {sun:"#a8853f",stone:"#8a8578",tree:"#3f7a55",water:"#2c5f5d",
+               cloud:"#8a8578",moon:"#7d7566",wind:"#8a8578",fire:"#9e2b25"};
+
+/* =========================================================
+   1 · 双语文案
+   ========================================================= */
+var LANG = "zh";
+try{ var _sl=localStorage.getItem("hltl_lang"); if(_sl==="zh"||_sl==="hant"||_sl==="en") LANG=_sl; }catch(e){}
+var L = {};
+
+L.zh = {
+  gtitle:"「发明」河图洛书", langbtn:"EN",
+  act1:"第一场 · 造语言", act2:"第二场 · 凑够十", act3:"第三场 · 语言不够用",
+  next:"下一步", start:"开始", skip:"跳过", back:"上一步", cont:"继续",
+  showNum:"显示数字", giveUp:"我认输了",
+  statLine:"认输 {a} 次 · 无效摆放 {b} 次",
+  tKe:"【可证】", tGu:"【古说】", tJin:"【今人推法】",
+  dirS:"南", dirN:"北", dirE:"东", dirW:"西",
+
+  /* ---- 第一场 ---- */
+  a1sub0:"开场", a1sub1:"发明记号", a1sub2:"万物海选", a1sub3:"四时闭环",
+  a1_act:"第一场", a1_tt:"你造出了一套语言",
+  a1_p1:"你穿越了。时间不详，反正是个山洞比房子多的年代。",
+  a1_p2:"老哥们扛着石矛出去刷猛犸象，集美们提着藤筐去采果子。<strong>你被留在洞里。</strong>",
+  a1_p3:"长老摸着你的头说：此子骨骼清奇，必成大器。<br><span class='muted'>（潜台词：这孩子干活不行，打猎碍事，圈养吧。）</span>",
+  a1_p4:"别人搞具象。你负责搞抽象。<br>你是全村唯一的闲人——而只有吃饱了撑的，才有工夫琢磨宇宙。",
+  a1_q:"你觉得他们为什么把你留下？",
+  a1_o1:"我是真的聪明", a1_o2:"我打猎会送人头", a1_o3:"长老欠我一个人情",
+  a1_r1:"行吧。那你最好真能琢磨出点什么。",
+  a1_r2:"实话实说，值得尊敬。",
+  a1_r3:"……这个理由我们不深究。",
+
+  a1w_act:"第一件事", a1w_tt:"你得先会记账",
+  a1w_p1:"你的工作是记录。今天打到什么，你得画下来。",
+  a1w_p2:"你手上只有一个记号：<strong>○</strong>，表示「有」。<br>点击有收获的那天，把 ○ 画上去。",
+  a1w_day:"第 {d} 天", a1w_hit:"有收获", a1w_miss:"空手",
+  a1w_call:"让老王来读",
+  a1w_wang:"隔壁老王",
+  a1w_say0:"（他还在路上）",
+  a1w_say1:"哟兄弟，我数了数，你们出去了……四天？收成还行啊。",
+  a1w_bad:"你出去了七天。他读成了四天。",
+  a1w_p3:"你盯着墙上那三块空白。<br>问题出在这儿：<strong>「无」不能靠不画。</strong>",
+  a1w_p4:"一个「无」和一百个「无」，在空墙上没有任何区别。",
+  a1w_invent:"把圈涂黑",
+  a1w_p5:"你把一个 ○ 涂满，得到 <strong>●</strong>。<br>现在把那三天补上。",
+  a1w_say2:"哦——七天，中间空了三天。这我看懂了。",
+  a1w_tool_yang:"有", a1w_tool_yin:"无",
+  a1w_done:"你刚刚发明了两个东西。",
+  a1w_rev:"○ 轻、在上、明、动、天。你叫它 <strong>阳</strong>。<br>● 重、在下、暗、静、地。你叫它 <strong>阴</strong>。",
+  a1w_rev2:"顺带一提：往后你会发现，○ 天然配奇数，● 天然配偶数。这不是规定，是你刚才自己那么用的。",
+
+  a1c_act:"第二件事", a1c_tt:"给数字找代言人",
+  a1c_intro:"部落第一美女指着一堆果子问：「这到底是多少个玩意儿？」<br>你的 CPU 当场干烧。光有「有」和「无」不够，还得解决「多少」。",
+  a1c_round:"第 {i} / 5 位",
+  a1c_crit:"这一轮的标准",
+  a1c_pickhint:"点一个候选。不合格的会当场出局，并告诉你为什么。",
+  a1c_1_crit1:"哪儿都有它", a1c_1_crit2:"没它活不了", a1c_1_crit3:"它总往低处走",
+  a1c_1_q:"「一」是万物的第一个单位。谁来代言它？",
+  a1c_2_crit1:"它必须是「水」的反义词", a1c_2_crit2:"它给你热和光", a1c_2_crit3:"它永远向上烧",
+  a1c_2_q:"「二」比「一」多。多意味着暖、亮、安全。谁来代言？",
+  opt_sun:"阳光", opt_stone:"石头", opt_tree:"树木", opt_water:"水",
+  opt_cloud:"云", opt_moon:"月亮", opt_wind:"风", opt_fire:"火",
+  why_sun:"晚上就没了。不算「哪儿都有」。",
+  why_stone:"你啃石头活不下去。",
+  why_tree:"沙漠戈壁没有树。",
+  why_cloud:"它在上面，但它不热。",
+  why_moon:"它亮，但它是凉的。",
+  why_wind:"它到处跑，但你抓不住它，也烤不熟东西。",
+  ok_water:"哪儿都有、离了活不了、永远往低处流。全票通过。",
+  ok_fire:"热、亮、永远向上。水在下，它就该在上。",
+  got_1:"<b>天一生水。</b>水在下，所以「一」放最下方——北，冬。",
+  got_2:"<b>地二生火。</b>火在上，所以「二」放最上方——南，夏。你刚画出世界的第一根轴线。",
+  a1c_3_q:"「三」是什么？你发现三 = 一 + 二。",
+  a1c_3_hint:"把两块料点一下，合成看看。",
+  a1c_3_ok:"水加上阳光，河边的东西开始疯长。",
+  got_3:"<b>天三生木。</b>生长本身。放左边——东，春，日出的方向。",
+  a1c_4_q:"「四」你画完就觉得不对劲。",
+  a1c_4_hint:"试着把它从中间劈开。",
+  a1c_4_split:"劈一刀",
+  a1c_4_after:"四劈成了两个二。你的发明第一次<strong>往回走</strong>了。",
+  a1c_4_try:"那一、二、三呢？劈劈看：",
+  a1c_4_no:"劈不开。",
+  a1c_4_yes:"只有四劈得开。",
+  got_4:"<b>地四生金。</b>收敛、回归、肃杀——秋天的味道。放右边，西。",
+  a1c_5_q:"东南西北都齐了。可正中间还是空的。",
+  a1c_5_hint:"试着把五拆开看看。",
+  a1c_5_b1:"拆成 1 + 4", a1c_5_b2:"拆成 2 + 3",
+  a1c_5_r1:"水 + 金。", a1c_5_r2:"火 + 木。",
+  a1c_5_after:"金木水火，全在五里面。<strong>它不是演员，它是舞台。</strong>",
+  got_5:"<b>天五生土。</b>C 位。水在土上流，火在土上烧，木在土里长，金在土里埋。",
+
+  a1f_act:"第一场 · 结算", a1f_tt:"转一圈就是一年",
+  a1f_p1:"五个位置填满的那一刻，图自己转了起来。",
+  a1f_ring:"北 冬 → 东 春 → 南 夏 → 西 秋",
+  a1f_p2:"你没打算发明历法。<br><strong>但你手里这张图，转一圈就是一年。</strong>",
+  a1f_list:"清点一下你这半天干了什么：",
+  a1f_items:"阴阳 · 数字一到五 · 五行 · 四方 · 四季",
+  a1f_p3:"你造出了一套语言。",
+  a1f_next:"进入第二场",
+  seasonN:"冬", seasonE:"春", seasonS:"夏", seasonW:"秋", seasonC:"轴",
+  wx_water:"水", wx_fire:"火", wx_wood:"木", wx_metal:"金", wx_earth:"土",
+
+  /* ---- 第二场 ---- */
+  a2sub:"生数与成数", a2sub2:"结算",
+  a2_act:"第二场", a2_tt:"凑够十",
+  a2_p1:"你伸出两只手数了数。一到五不够——<strong>得数到十才算圆满。</strong>",
+  a2_p2:"可六到十是什么？你盯着中间那个「五」，忽然明白了：<br>五是土，是承载一切的那块地。<strong>任何数加上它，就完成一次。</strong>",
+  a2_hint:"挨个按下去看看。",
+  a2_btn:"＋ 五",
+  a2_note:"{a} + 5 = {b}　还是{wx}。{p}",
+  a2_flip:"奇变偶。", a2_flip2:"偶变奇。",
+  a2_born:"生数", a2_cheng:"成数",
+  a2_row:"{wx}",
+  a2_done_p1:"生数在内，成数在外。十数图成了。",
+  a2_t1:"总点数", a2_t2:"天数（奇）", a2_t3:"地数（偶）",
+  a2_verse:"一六共宗，二七同道，三八为朋，四九为友，五十同途。",
+  a2_versenote:"（出处待核：常被系于黄石公《青囊经》，但该书成书年代与作者归属均有争议。）",
+  a2_p3:"这张图讲的是<strong>「生」</strong>——水生木、木生火、火生土、土生金、金生水。一个转不停的正反馈。",
+  a2_next:"进入第三场",
+
+  /* ---- 第三场 ---- */
+  a3sub0:"讲「克」的那一张", a3sub1:"步骤一 · 谁克谁", a3sub2:"步骤二 · 阳数入四正",
+  a3sub3:"步骤三 · 阴数入四隅", a3sub4:"步骤四 · 卡住了", a3sub5:"步骤五 · 加一加", a3sub6:"结算",
+  a3_act:"第三场", a3_tt:"再画一张",
+  a3_lab_tushi:"十数图 · 第二场的成果",
+  a3_p1:"你躺了几天，忽然觉得不对劲。这张图只画了世界好的一面——<strong>生生不息</strong>。",
+  a3_p2:"可如果只有「生」，兔子早就把地球吃光了，癌细胞早就统治世界了。",
+  a3_p3:"光有正反馈不行，得有东西踩刹车。你要再画一张，讲<strong>「克」</strong>。",
+  a3_p4:"十数图五组两数之差恒为五，总点数五十五：奇数之和二十五，偶数之和三十。新的一张只用一到九，总点数四十五。",
+  s1_act:"步骤一", s1_tt:"谁克谁",
+  s1_p1:"先热热身。「生」是给予，「克」是<strong>对抗</strong>——一个压住另一个。",
+  s1_p2:"点左边一个，再点右边一个。连错了线会弹回去。",
+  s1_p3:"水克火、火克金、金克木、木克土、土克水。",
+  s1_left:"克者", s1_right:"被克", s1_ke:"克",
+  s1_count:"已连 {n} / 5",
+  s2_act:"步骤二", s2_tt:"阳数入四正",
+  s2_p1:"白点是阳。阳与阳才对冲——同一个生态位上的，才谈得上竞争。把一、三、五、七、九放进四正与中央。",
+  s2_tray:"阳数 · 白点",
+  s3_act:"步骤三", s3_tt:"阴数入四隅",
+  s3_p1:"黑点是阴。四个正位占满了，剩下四个角。把二、四、六、八放进去。",
+  s3_tray:"阴数 · 黑点",
+  rules_hd:"你定下的规矩",
+  R1:"五居中——它是和事佬，谁也不克。",
+  R2:"最小的阳一，与最大的阳九，正对。",
+  R3:"剩下的三与七，也正对。",
+  R4:"承接十数图：水一在北，木三在东。",
+  R5:"二与八正对，四与六正对——阴也要各自对冲。",
+  R6:"五行同族相邻：二七同火、四九同金、六一同水、八三同木。",
+  trayEmpty:"（都摆上去了）",
+  autoMsg:"剩下两枚没得选了，它们自己落了位。",
+  zoneMsg:"这一步动不了那个位置。",
+  giveMsg1:"有几枚退回去了。这样好像还不够用。",
+  giveMsg2:"规矩还没走完。",
+  asideHd:"旁注 · 可不看 ▾",
+  asideBd:"注意：九本属金、七本属火，它们在这张图里换了位。你没打算这么干，是「对冲」自己生出来的。后人管这叫<strong>火金易位</strong>。",
+  s4_act:"步骤四", s4_tt:"卡住了",
+  s4_p1:"你把规矩挨个检查了一遍。都对。<br>然后你发现——<strong>合格的摆法不止一种。</strong>",
+  s4_q1:"两张都合格。你的规矩用完了。",
+  s4_q2:"古人如果只有这套语言，走到这一步就得掷筊了。",
+  candJia:"候选甲", candYi:"候选乙", candMine:"你摆的",
+  s5_act:"步骤五", s5_tt:"加一加",
+  s5_hint:"「把每条线上的三个数加起来看看。」",
+  s5_p1:"点任意一条横、竖、斜线。",
+  s5_all:"全部求和",
+  s5_vJ:"行 21 / 15 / 9，列 17 / 15 / 13。两条斜线是十五，其余不齐。",
+  s5_vY:"八条线，全是十五。",
+  s5_r1:"你用阴阳和五行，把 <strong>362,880</strong> 种可能压到了 <strong>2</strong> 种。<br>最后那一刀，只有数学切得下去。",
+  s5_r2:"一到九填进三阶方格、使每条线都等于十五的摆法恰有八个，且互为旋转与镜像——本质上只有一张图。",
+  s5_r3:"你手里这张图，戴九履一，左三右七，二四为肩，六八为足。",
+  s5_close:"合上",
+  end_spin:"八个变体，转着转着就转回来了。", end_stop:"定格。",
+  end_t1:"用时", end_t2:"认输", end_t3:"无效摆放", end_unit:"次",
+  end_line:"四千年前，有人也停在了这里。",
+  end_p1:"八个解全部自动满足你那两条象数规矩——阴阳对冲、五行同族相邻。象数的语言和「横竖斜皆十五」，描述的是同一个结构。",
+  end_p2:"下一场，你要给这两张图取名字。",
+  end_restart:"从第一场再走一遍"
+};
+
+L.hant = {
+  gtitle:"「發明」河圖洛書", langbtn:"EN",
+  act1:"第一場 · 造語言", act2:"第二場 · 湊夠十", act3:"第三場 · 語言不夠用",
+  next:"下一步", start:"開始", skip:"跳過", back:"上一步", cont:"繼續",
+  showNum:"顯示數字", giveUp:"我認輸了",
+  statLine:"認輸 {a} 次 · 無效擺放 {b} 次",
+  tKe:"【可證】", tGu:"【古説】", tJin:"【今人推法】",
+  dirS:"南", dirN:"北", dirE:"東", dirW:"西",
+
+  /* ---- 第一場 ---- */
+  a1sub0:"開場", a1sub1:"發明記號", a1sub2:"萬物海選", a1sub3:"四時閉環",
+  a1_act:"第一場", a1_tt:"你造出了一套語言",
+  a1_p1:"你穿越了。時間不詳，反正是個山洞比房子多的年代。",
+  a1_p2:"老哥們扛着石矛出去刷猛獁象，集美們提着藤筐去採果子。<strong>你被留在洞裏。</strong>",
+  a1_p3:"長老摸着你的頭説：此子骨骼清奇，必成大器。<br><span class='muted'>（潛台詞：這孩子幹活不行，打獵礙事，圈養吧。）</span>",
+  a1_p4:"別人搞具象。你負責搞抽象。<br>你是全村唯一的閒人——而只有吃飽了撐的，才有工夫琢磨宇宙。",
+  a1_q:"你覺得他們為什麼把你留下？",
+  a1_o1:"我是真的聰明", a1_o2:"我打獵會送人頭", a1_o3:"長老欠我一個人情",
+  a1_r1:"行吧。那你最好真能琢磨出點什麼。",
+  a1_r2:"實話實説，值得尊敬。",
+  a1_r3:"……這個理由我們不深究。",
+
+  a1w_act:"第一件事", a1w_tt:"你得先會記賬",
+  a1w_p1:"你的工作是記錄。今天打到什麼，你得畫下來。",
+  a1w_p2:"你手上只有一個記號：<strong>○</strong>，表示「有」。<br>點擊有收穫的那天，把 ○ 畫上去。",
+  a1w_day:"第 {d} 天", a1w_hit:"有收穫", a1w_miss:"空手",
+  a1w_call:"讓老王來讀",
+  a1w_wang:"隔壁老王",
+  a1w_say0:"（他還在路上）",
+  a1w_say1:"喲兄弟，我數了數，你們出去了……四天？收成還行啊。",
+  a1w_bad:"你出去了七天。他讀成了四天。",
+  a1w_p3:"你盯着牆上那三塊空白。<br>問題出在這兒：<strong>「無」不能靠不畫。</strong>",
+  a1w_p4:"一個「無」和一百個「無」，在空牆上沒有任何區別。",
+  a1w_invent:"把圈塗黑",
+  a1w_p5:"你把一個 ○ 塗滿，得到 <strong>●</strong>。<br>現在把那三天補上。",
+  a1w_say2:"哦——七天，中間空了三天。這我看懂了。",
+  a1w_tool_yang:"有", a1w_tool_yin:"無",
+  a1w_done:"你剛剛發明了兩個東西。",
+  a1w_rev:"○ 輕、在上、明、動、天。你叫它 <strong>陽</strong>。<br>● 重、在下、暗、靜、地。你叫它 <strong>陰</strong>。",
+  a1w_rev2:"順帶一提：往後你會發現，○ 天然配奇數，● 天然配偶數。這不是規定，是你剛才自己那麼用的。",
+
+  a1c_act:"第二件事", a1c_tt:"給數字找代言人",
+  a1c_intro:"部落第一美女指着一堆果子問：「這到底是多少個玩意兒？」<br>你的 CPU 當場乾燒。光有「有」和「無」不夠，還得解決「多少」。",
+  a1c_round:"第 {i} / 5 位",
+  a1c_crit:"這一輪的標準",
+  a1c_pickhint:"點一個候選。不合格的會當場出局，並告訴你為什麼。",
+  a1c_1_crit1:"哪兒都有它", a1c_1_crit2:"沒它活不了", a1c_1_crit3:"它總往低處走",
+  a1c_1_q:"「一」是萬物的第一個單位。誰來代言它？",
+  a1c_2_crit1:"它必須是「水」的反義詞", a1c_2_crit2:"它給你熱和光", a1c_2_crit3:"它永遠向上燒",
+  a1c_2_q:"「二」比「一」多。多意味着暖、亮、安全。誰來代言？",
+  opt_sun:"陽光", opt_stone:"石頭", opt_tree:"樹木", opt_water:"水",
+  opt_cloud:"雲", opt_moon:"月亮", opt_wind:"風", opt_fire:"火",
+  why_sun:"晚上就沒了。不算「哪兒都有」。",
+  why_stone:"你啃石頭活不下去。",
+  why_tree:"沙漠戈壁沒有樹。",
+  why_cloud:"它在上面，但它不熱。",
+  why_moon:"它亮，但它是涼的。",
+  why_wind:"它到處跑，但你抓不住它，也烤不熟東西。",
+  ok_water:"哪兒都有、離了活不了、永遠往低處流。全票通過。",
+  ok_fire:"熱、亮、永遠向上。水在下，它就該在上。",
+  got_1:"<b>天一生水。</b>水在下，所以「一」放最下方——北，冬。",
+  got_2:"<b>地二生火。</b>火在上，所以「二」放最上方——南，夏。你剛畫出世界的第一根軸線。",
+  a1c_3_q:"「三」是什麼？你發現三 = 一 + 二。",
+  a1c_3_hint:"把兩塊料點一下，合成看看。",
+  a1c_3_ok:"水加上陽光，河邊的東西開始瘋長。",
+  got_3:"<b>天三生木。</b>生長本身。放左邊——東，春，日出的方向。",
+  a1c_4_q:"「四」你畫完就覺得不對勁。",
+  a1c_4_hint:"試着把它從中間劈開。",
+  a1c_4_split:"劈一刀",
+  a1c_4_after:"四劈成了兩個二。你的發明第一次<strong>往回走</strong>了。",
+  a1c_4_try:"那一、二、三呢？劈劈看：",
+  a1c_4_no:"劈不開。",
+  a1c_4_yes:"只有四劈得開。",
+  got_4:"<b>地四生金。</b>收斂、迴歸、肅殺——秋天的味道。放右邊，西。",
+  a1c_5_q:"東南西北都齊了。可正中間還是空的。",
+  a1c_5_hint:"試着把五拆開看看。",
+  a1c_5_b1:"拆成 1 + 4", a1c_5_b2:"拆成 2 + 3",
+  a1c_5_r1:"水 + 金。", a1c_5_r2:"火 + 木。",
+  a1c_5_after:"金木水火，全在五里面。<strong>它不是演員，它是舞台。</strong>",
+  got_5:"<b>天五生土。</b>C 位。水在土上流，火在土上燒，木在土裏長，金在土裏埋。",
+
+  a1f_act:"第一場 · 結算", a1f_tt:"轉一圈就是一年",
+  a1f_p1:"五個位置填滿的那一刻，圖自己轉了起來。",
+  a1f_ring:"北 冬 → 東 春 → 南 夏 → 西 秋",
+  a1f_p2:"你沒打算發明曆法。<br><strong>但你手裏這張圖，轉一圈就是一年。</strong>",
+  a1f_list:"清點一下你這半天幹了什麼：",
+  a1f_items:"陰陽 · 數字一到五 · 五行 · 四方 · 四季",
+  a1f_p3:"你造出了一套語言。",
+  a1f_next:"進入第二場",
+  seasonN:"冬", seasonE:"春", seasonS:"夏", seasonW:"秋", seasonC:"軸",
+  wx_water:"水", wx_fire:"火", wx_wood:"木", wx_metal:"金", wx_earth:"土",
+
+  /* ---- 第二場 ---- */
+  a2sub:"生數與成數", a2sub2:"結算",
+  a2_act:"第二場", a2_tt:"湊夠十",
+  a2_p1:"你伸出兩隻手數了數。一到五不夠——<strong>得數到十才算圓滿。</strong>",
+  a2_p2:"可六到十是什麼？你盯着中間那個「五」，忽然明白了：<br>五是土，是承載一切的那塊地。<strong>任何數加上它，就完成一次。</strong>",
+  a2_hint:"挨個按下去看看。",
+  a2_btn:"＋ 五",
+  a2_note:"{a} + 5 = {b}　還是{wx}。{p}",
+  a2_flip:"奇變偶。", a2_flip2:"偶變奇。",
+  a2_born:"生數", a2_cheng:"成數",
+  a2_row:"{wx}",
+  a2_done_p1:"生數在內，成數在外。十數圖成了。",
+  a2_t1:"總點數", a2_t2:"天數（奇）", a2_t3:"地數（偶）",
+  a2_verse:"一六共宗，二七同道，三八為朋，四九為友，五十同途。",
+  a2_versenote:"（出處待核：常被繫於黃石公《青囊經》，但該書成書年代與作者歸屬均有爭議。）",
+  a2_p3:"這張圖講的是<strong>「生」</strong>——水生木、木生火、火生土、土生金、金生水。一個轉不停的正反饋。",
+  a2_next:"進入第三場",
+
+  /* ---- 第三場 ---- */
+  a3sub0:"講「克」的那一張", a3sub1:"步驟一 · 誰克誰", a3sub2:"步驟二 · 陽數入四正",
+  a3sub3:"步驟三 · 陰數入四隅", a3sub4:"步驟四 · 卡住了", a3sub5:"步驟五 · 加一加", a3sub6:"結算",
+  a3_act:"第三場", a3_tt:"再畫一張",
+  a3_lab_tushi:"十數圖 · 第二場的成果",
+  a3_p1:"你躺了幾天，忽然覺得不對勁。這張圖只畫了世界好的一面——<strong>生生不息</strong>。",
+  a3_p2:"可如果只有「生」，兔子早就把地球吃光了，癌細胞早就統治世界了。",
+  a3_p3:"光有正反饋不行，得有東西踩剎車。你要再畫一張，講<strong>「克」</strong>。",
+  a3_p4:"十數圖五組兩數之差恆為五，總點數五十五：奇數之和二十五，偶數之和三十。新的一張只用一到九，總點數四十五。",
+  s1_act:"步驟一", s1_tt:"誰克誰",
+  s1_p1:"先熱熱身。「生」是給予，「克」是<strong>對抗</strong>——一個壓住另一個。",
+  s1_p2:"點左邊一個，再點右邊一個。連錯了線會彈回去。",
+  s1_p3:"水克火、火克金、金克木、木克土、土克水。",
+  s1_left:"克者", s1_right:"被克", s1_ke:"克",
+  s1_count:"已連 {n} / 5",
+  s2_act:"步驟二", s2_tt:"陽數入四正",
+  s2_p1:"白點是陽。陽與陽才對衝——同一個生態位上的，才談得上競爭。把一、三、五、七、九放進四正與中央。",
+  s2_tray:"陽數 · 白點",
+  s3_act:"步驟三", s3_tt:"陰數入四隅",
+  s3_p1:"黑點是陰。四個正位佔滿了，剩下四個角。把二、四、六、八放進去。",
+  s3_tray:"陰數 · 黑點",
+  rules_hd:"你定下的規矩",
+  R1:"五居中——它是和事佬，誰也不克。",
+  R2:"最小的陽一，與最大的陽九，正對。",
+  R3:"剩下的三與七，也正對。",
+  R4:"承接十數圖：水一在北，木三在東。",
+  R5:"二與八正對，四與六正對——陰也要各自對沖。",
+  R6:"五行同族相鄰：二七同火、四九同金、六一同水、八三同木。",
+  trayEmpty:"（都擺上去了）",
+  autoMsg:"剩下兩枚沒得選了，它們自己落了位。",
+  zoneMsg:"這一步動不了那個位置。",
+  giveMsg1:"有幾枚退回去了。這樣好像還不夠用。",
+  giveMsg2:"規矩還沒走完。",
+  asideHd:"旁註 · 可不看 ▾",
+  asideBd:"注意：九本屬金、七本屬火，它們在這張圖裏換了位。你沒打算這麼幹，是「對沖」自己生出來的。後人管這叫<strong>火金易位</strong>。",
+  s4_act:"步驟四", s4_tt:"卡住了",
+  s4_p1:"你把規矩挨個檢查了一遍。都對。<br>然後你發現——<strong>合格的擺法不止一種。</strong>",
+  s4_q1:"兩張都合格。你的規矩用完了。",
+  s4_q2:"古人如果只有這套語言，走到這一步就得擲筊了。",
+  candJia:"候選甲", candYi:"候選乙", candMine:"你擺的",
+  s5_act:"步驟五", s5_tt:"加一加",
+  s5_hint:"「把每條線上的三個數加起來看看。」",
+  s5_p1:"點任意一條橫、豎、斜線。",
+  s5_all:"全部求和",
+  s5_vJ:"行 21 / 15 / 9，列 17 / 15 / 13。兩條斜線是十五，其餘不齊。",
+  s5_vY:"八條線，全是十五。",
+  s5_r1:"你用陰陽和五行，把 <strong>362,880</strong> 種可能壓到了 <strong>2</strong> 種。<br>最後那一刀，只有數學切得下去。",
+  s5_r2:"一到九填進三階方格、使每條線都等於十五的擺法恰有八個，且互為旋轉與鏡像——本質上只有一張圖。",
+  s5_r3:"你手裏這張圖，戴九履一，左三右七，二四為肩，六八為足。",
+  s5_close:"合上",
+  end_spin:"八個變體，轉着轉着就轉回來了。", end_stop:"定格。",
+  end_t1:"用時", end_t2:"認輸", end_t3:"無效擺放", end_unit:"次",
+  end_line:"四千年前，有人也停在了這裏。",
+  end_p1:"八個解全部自動滿足你那兩條象數規矩——陰陽對沖、五行同族相鄰。象數的語言和「橫豎斜皆十五」，描述的是同一個結構。",
+  end_p2:"下一場，你要給這兩張圖取名字。",
+  end_restart:"從第一場再走一遍"
+};
+
+L.en = {
+  gtitle:"Invent the Lo Shu", langbtn:"中文",
+  act1:"I · Build a language", act2:"II · Reach ten", act3:"III · Language runs out",
+  next:"Next", start:"Begin", skip:"Skip", back:"Back", cont:"Continue",
+  showNum:"Show numerals", giveUp:"I give up",
+  statLine:"Gave up {a}× · invalid placements {b}",
+  tKe:"[PROVEN]", tGu:"[CLASSICAL]", tJin:"[OUR RECONSTRUCTION]",
+  dirS:"S", dirN:"N", dirE:"E", dirW:"W",
+
+  a1sub0:"Opening", a1sub1:"Inventing marks", a1sub2:"Casting call", a1sub3:"The year closes",
+  a1_act:"SCENE I", a1_tt:"You build a language",
+  a1_p1:"You have travelled back. The date is unclear — an age with more caves than houses.",
+  a1_p2:"The others take their spears out after mammoth. The rest go gathering. <strong>You are left in the cave.</strong>",
+  a1_p3:"The elder pats your head: this one has unusual bones, he will amount to something.<br><span class='muted'>(Subtext: he is useless at hunting and gets in the way. Keep him indoors.)</span>",
+  a1_p4:"Everyone else handles the concrete. You handle the abstract.<br>You are the village's only idle man — and only someone well fed has time to wonder about the universe.",
+  a1_q:"Why do you think they kept you?",
+  a1_o1:"I really am clever", a1_o2:"I'd get myself killed hunting", a1_o3:"The elder owes me one",
+  a1_r1:"Fine. Then you had better actually think of something.",
+  a1_r2:"Honest. That deserves respect.",
+  a1_r3:"…We won't look into that one too closely.",
+
+  a1w_act:"FIRST TASK", a1w_tt:"You need to keep records",
+  a1w_p1:"Your job is to record. Whatever the hunt brings, you put it on the wall.",
+  a1w_p2:"You have exactly one mark: <strong>○</strong>, meaning <em>something</em>.<br>Click the days with a catch and put ○ on them.",
+  a1w_day:"Day {d}", a1w_hit:"catch", a1w_miss:"nothing",
+  a1w_call:"Let the neighbour read it",
+  a1w_wang:"The neighbour",
+  a1w_say0:"(still on his way)",
+  a1w_say1:"Hey. I counted them — so you were out… four days? Not a bad haul.",
+  a1w_bad:"You were out seven days. He read four.",
+  a1w_p3:"You stare at the three blank patches.<br>Here is the problem: <strong>nothing cannot be recorded by drawing nothing.</strong>",
+  a1w_p4:"One <em>nothing</em> and a hundred <em>nothings</em> look exactly the same on a blank wall.",
+  a1w_invent:"Fill the circle in",
+  a1w_p5:"You fill one ○ solid and get <strong>●</strong>.<br>Now go back and mark those three days.",
+  a1w_say2:"Ah — seven days, three of them empty in the middle. That I can read.",
+  a1w_tool_yang:"something", a1w_tool_yin:"nothing",
+  a1w_done:"You have just invented two things.",
+  a1w_rev:"○ is light, above, bright, moving, sky. You call it <strong>yang</strong>.<br>● is heavy, below, dark, still, earth. You call it <strong>yin</strong>.",
+  a1w_rev2:"One more thing you'll notice later: ○ naturally goes with odd numbers, ● with even. Nobody decreed that. It is simply how you just used them.",
+
+  a1c_act:"SECOND TASK", a1c_tt:"Find each number a spokesman",
+  a1c_intro:"Someone points at a pile of berries and asks: how many <em>things</em> is that, exactly?<br>Your brain locks up. <em>Something</em> and <em>nothing</em> are not enough. You need <em>how many</em>.",
+  a1c_round:"Position {i} of 5",
+  a1c_crit:"Standards for this round",
+  a1c_pickhint:"Pick a candidate. Failures are eliminated on the spot, with the reason.",
+  a1c_1_crit1:"It is everywhere", a1c_1_crit2:"Nothing lives without it", a1c_1_crit3:"It always seeks the lowest place",
+  a1c_1_q:"One is the first unit of everything. Who speaks for it?",
+  a1c_2_crit1:"It must be the opposite of water", a1c_2_crit2:"It gives heat and light", a1c_2_crit3:"It always burns upward",
+  a1c_2_q:"Two is more than one. More means warmth, light, safety. Who speaks for it?",
+  opt_sun:"Sunlight", opt_stone:"Stone", opt_tree:"Trees", opt_water:"Water",
+  opt_cloud:"Cloud", opt_moon:"Moon", opt_wind:"Wind", opt_fire:"Fire",
+  why_sun:"Gone at night. Not everywhere.",
+  why_stone:"You cannot live on stone.",
+  why_tree:"Deserts have none.",
+  why_cloud:"It is above, but it is not hot.",
+  why_moon:"Bright, but cold.",
+  why_wind:"It goes everywhere, but you cannot hold it or cook with it.",
+  ok_water:"Everywhere, indispensable, always flowing downward. Unanimous.",
+  ok_fire:"Hot, bright, always rising. Water is below, so this belongs above.",
+  got_1:"<b>Heaven's one begets water.</b> Water sinks, so one goes at the bottom — north, winter.",
+  got_2:"<b>Earth's two begets fire.</b> Fire rises, so two goes at the top — south, summer. You have just drawn the world's first axis.",
+  a1c_3_q:"What is three? You notice three = one + two.",
+  a1c_3_hint:"Click the two ingredients and combine them.",
+  a1c_3_ok:"Water plus sunlight, and everything by the river starts growing.",
+  got_3:"<b>Heaven's three begets wood.</b> Growth itself. It goes left — east, spring, where the sun comes up.",
+  a1c_4_q:"You draw four, look at it, and something feels off.",
+  a1c_4_hint:"Try splitting it down the middle.",
+  a1c_4_split:"Split it",
+  a1c_4_after:"Four splits into two twos. For the first time your invention has <strong>walked backwards</strong>.",
+  a1c_4_try:"What about one, two, three? Try them:",
+  a1c_4_no:"Won't split.",
+  a1c_4_yes:"Only four splits.",
+  got_4:"<b>Earth's four begets metal.</b> Contraction, return, the killing edge — the taste of autumn. It goes right, west.",
+  a1c_5_q:"All four directions are filled. The centre is still empty.",
+  a1c_5_hint:"Try taking five apart.",
+  a1c_5_b1:"Split as 1 + 4", a1c_5_b2:"Split as 2 + 3",
+  a1c_5_r1:"Water + metal.", a1c_5_r2:"Fire + wood.",
+  a1c_5_after:"Metal, wood, water, fire — all of them are inside five. <strong>It is not an actor. It is the stage.</strong>",
+  got_5:"<b>Heaven's five begets earth.</b> Dead centre. Water flows on it, fire burns on it, wood grows in it, metal is buried in it.",
+
+  a1f_act:"SCENE I · CLOSING", a1f_tt:"One turn is one year",
+  a1f_p1:"The moment the fifth position fills, the diagram starts to turn on its own.",
+  a1f_ring:"North winter → east spring → south summer → west autumn",
+  a1f_p2:"You never set out to invent a calendar.<br><strong>But the thing in your hands, turned once, is a year.</strong>",
+  a1f_list:"Take stock of your afternoon:",
+  a1f_items:"Yin and yang · the numbers one to five · the five phases · four directions · four seasons",
+  a1f_p3:"You have built a language.",
+  a1f_next:"On to Scene II",
+  seasonN:"winter", seasonE:"spring", seasonS:"summer", seasonW:"autumn", seasonC:"axle",
+  wx_water:"Water", wx_fire:"Fire", wx_wood:"Wood", wx_metal:"Metal", wx_earth:"Earth",
+
+  a2sub:"Generating and completing", a2sub2:"Closing",
+  a2_act:"SCENE II", a2_tt:"Reach ten",
+  a2_p1:"You count on both hands. One to five is not enough — <strong>ten is what makes it whole.</strong>",
+  a2_p2:"But what are six through ten? You stare at the five in the middle and it clicks:<br>five is earth, the ground that carries everything. <strong>Add it to any number and that number is completed.</strong>",
+  a2_hint:"Press them one by one.",
+  a2_btn:"+ five",
+  a2_note:"{a} + 5 = {b} — still {wx}. {p}",
+  a2_flip:"Odd becomes even.", a2_flip2:"Even becomes odd.",
+  a2_born:"generating", a2_cheng:"completing",
+  a2_row:"{wx}",
+  a2_done_p1:"Generating numbers inside, completing numbers outside. The Ten-Number Diagram is finished.",
+  a2_t1:"Total dots", a2_t2:"Heaven (odd)", a2_t3:"Earth (even)",
+  a2_verse:"One and six share a lineage; two and seven a road; three and eight are companions; four and nine are friends; five and ten travel together.",
+  a2_versenote:"(Source unverified: often attributed to the Qingnang Jing, but its date and authorship are both disputed.)",
+  a2_p3:"This diagram is about <strong>generation</strong> — water feeds wood, wood feeds fire, fire feeds earth, earth feeds metal, metal feeds water. A positive feedback loop that never stops.",
+  a2_next:"On to Scene III",
+
+  a3sub0:"The one about conquest", a3sub1:"Step 1 · What conquers what", a3sub2:"Step 2 · Yang on the four sides",
+  a3sub3:"Step 3 · Yin in the four corners", a3sub4:"Step 4 · Stuck", a3sub5:"Step 5 · Add them up", a3sub6:"Closing",
+  a3_act:"SCENE III", a3_tt:"Draw a second one",
+  a3_lab_tushi:"Ten-Number Diagram · from Scene II",
+  a3_p1:"After a few days lying around it starts to bother you. That diagram only shows the good half of the world — <strong>endless generation</strong>.",
+  a3_p2:"But if there were only generation, rabbits would have eaten the planet by now and cancer would already run the world.",
+  a3_p3:"Positive feedback alone doesn't work. Something has to hit the brakes. You need a second diagram — one about <strong>conquest</strong>.",
+  a3_p4:"In the Ten-Number Diagram each of the five pairs differs by exactly five; the dots total 55 — odds sum to 25, evens to 30. The new one uses only one through nine: 45 dots.",
+  s1_act:"STEP 1", s1_tt:"What conquers what",
+  s1_p1:"A warm-up. Generation gives; conquest <strong>opposes</strong> — one thing holds another down.",
+  s1_p2:"Click one on the left, then one on the right. Wrong links spring back.",
+  s1_p3:"Water conquers fire, fire conquers metal, metal conquers wood, wood conquers earth, earth conquers water.",
+  s1_left:"conquers", s1_right:"conquered", s1_ke:"→",
+  s1_count:"Linked {n} of 5",
+  s2_act:"STEP 2", s2_tt:"Yang on the four sides",
+  s2_p1:"White dots are yang. Only yang opposes yang — things compete only when they share a niche. Put one, three, five, seven and nine on the four sides and the centre.",
+  s2_tray:"Yang · white dots",
+  s3_act:"STEP 3", s3_tt:"Yin in the four corners",
+  s3_p1:"Black dots are yin. The four sides are taken; four corners remain. Place two, four, six and eight.",
+  s3_tray:"Yin · black dots",
+  rules_hd:"The rules you set",
+  R1:"Five sits at the centre — the peacemaker, conquering nothing.",
+  R2:"The smallest yang, one, faces the largest yang, nine.",
+  R3:"The remaining three and seven face each other too.",
+  R4:"Carried over from the Ten-Number Diagram: water-one north, wood-three east.",
+  R5:"Two faces eight and four faces six — yin opposes yin as well.",
+  R6:"Same phase, adjacent: two with seven (fire), four with nine (metal), six with one (water), eight with three (wood).",
+  trayEmpty:"(all placed)",
+  autoMsg:"The last two had nowhere else to go. They landed on their own.",
+  zoneMsg:"That position can't be touched at this step.",
+  giveMsg1:"A few came back off the board. This still isn't enough.",
+  giveMsg2:"The rules aren't satisfied yet.",
+  asideHd:"Aside · optional ▾",
+  asideBd:"Note: nine belongs to metal and seven to fire, yet here they have traded places. You didn't plan that — the opposition rule produced it by itself. Later writers call it <strong>the fire–metal exchange</strong>.",
+  s4_act:"STEP 4", s4_tt:"Stuck",
+  s4_p1:"You check the rules one by one. All satisfied.<br>Then you notice — <strong>more than one arrangement passes.</strong>",
+  s4_q1:"Both are valid. You have run out of rules.",
+  s4_q2:"If the ancients had only this language, this is where they would have had to cast lots.",
+  candJia:"Candidate A", candYi:"Candidate B", candMine:"yours",
+  s5_act:"STEP 5", s5_tt:"Add them up",
+  s5_hint:"“Try adding the three numbers along each line.”",
+  s5_p1:"Click any row, column or diagonal.",
+  s5_all:"Sum everything",
+  s5_vJ:"Rows 21 / 15 / 9, columns 17 / 15 / 13. Both diagonals make fifteen; nothing else does.",
+  s5_vY:"All eight lines. Every one of them fifteen.",
+  s5_r1:"Using yin-yang and the five phases, you narrowed <strong>362,880</strong> possibilities down to <strong>2</strong>.<br>That last cut — only mathematics can make it.",
+  s5_r2:"There are exactly eight ways to place one through nine in a 3×3 grid so every line sums to fifteen, and all eight are rotations and reflections of one another. Essentially there is only one diagram.",
+  s5_r3:"Nine on the head and one underfoot; three on the left, seven on the right; two and four are the shoulders, six and eight the feet.",
+  s5_close:"Close it",
+  end_spin:"Eight variants — turn them enough and you come back.", end_stop:"Settled.",
+  end_t1:"Time", end_t2:"Gave up", end_t3:"Invalid moves", end_unit:"×",
+  end_line:"Four thousand years ago, somebody else stopped here too.",
+  end_p1:"All eight solutions automatically satisfy both of your symbolic rules — yin-yang opposition and same-phase adjacency. The language of the ancients and “every line makes fifteen” describe the same structure.",
+  end_p2:"In the next scene, you get to name these two diagrams.",
+  end_restart:"Play again from Scene I"
+};
+
+L.zh.installBtn   = "安装为应用";
+L.hant.installBtn = "安裝為應用程式";
+L.en.installBtn   = "Install app";
+
+function t(k){ var v=L[LANG][k]; return (v===undefined)?("["+k+"]"):v; }
+function tf(k,o){ var s=t(k); for(var p in o){ s=s.split("{"+p+"}").join(o[p]); } return s; }
+function tag(kind){
+  if(kind==="ke")  return '<span class="tag t-ke">'+t("tKe")+'</span>';
+  if(kind==="gu")  return '<span class="tag t-gu">'+t("tGu")+'</span>';
+  return '<span class="tag t-jin">'+t("tJin")+'</span>';
+}
+
+/* =========================================================
+   2 · 状态
+   ========================================================= */
+var S = {
+  scene:"a1_intro",
+  why:null,
+  wallTool:"yang", wall:{}, wangStage:0, yinUnlocked:false,
+  castIdx:0, castOut:{}, castGot:{}, comboSel:{}, splitDone:false, splitTried:{}, decomp:{},
+  plus:{},
+  link:{}, linkSel:null,
+  cells:{}, tray:[], sel:null, showNum:false,
+  giveUps:0, bad:0, t0:null, autoDone:false,
+  sums:{}, settled:false, built:null,
+  ringStep:-1
+};
+var app=document.getElementById("app");
+function el(id){return document.getElementById(id);}
+
+/* =========================================================
+   3 · 通用绘制
+   ========================================================= */
+function dotsSVG(n,cx,cy,r,gap,opts){
+  opts=opts||{};
+  var cols=DOTS[n]; if(!cols) return "";
+  var white=(n%2===1);
+  var fill=white?"#fbf8f1":(opts.inkColor||"#1c1a17");
+  var stroke=opts.inkColor||"#1c1a17";
+  var sw=white?Math.max(1,r*0.30):Math.max(.7,r*0.16);
+  var totalW=(cols.length-1)*gap, out="";
+  for(var j=0;j<cols.length;j++){
+    var h=cols[j], x=cx-totalW/2+j*gap;
+    for(var i=0;i<h;i++){
+      var y=cy+(i-(h-1)/2)*gap;
+      out+='<circle cx="'+x.toFixed(2)+'" cy="'+y.toFixed(2)+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw.toFixed(2)+'"/>';
+    }
+  }
+  return out;
+}
+function chipSVG(n){ return '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">'+dotsSVG(n,20,20,3.1,8)+'</svg>'; }
+function markSVG(kind,size){
+  size=size||40; var r=size*0.28, c=size/2;
+  var white=(kind==="yang");
+  return '<svg viewBox="0 0 '+size+' '+size+'" xmlns="http://www.w3.org/2000/svg"><circle cx="'+c+'" cy="'+c+'" r="'+r
+    +'" fill="'+(white?"#fbf8f1":"#1c1a17")+'" stroke="#1c1a17" stroke-width="'+(white?2.2:1)+'"/></svg>';
+}
+function cellXY(slot){ var rc=SLOT_RC[slot]; return [40+rc[1]*100+50, 40+rc[0]*100+50]; }
+var LINE_DEF={r0:["SE","S","SW"],r1:["E","C","W"],r2:["NE","N","NW"],
+  c0:["SE","E","NE"],c1:["S","C","N"],c2:["SW","W","NW"],d0:["SE","C","NW"],d1:["SW","C","NE"]};
+var LINE_GEOM={r0:[[40,90],[340,90]],r1:[[40,190],[340,190]],r2:[[40,290],[340,290]],
+  c0:[[90,40],[90,340]],c1:[[190,40],[190,340]],c2:[[290,40],[290,340]],
+  d0:[[40,40],[340,340]],d1:[[340,40],[40,340]]};
+var SUM_POS={r0:[372,90],r1:[372,190],r2:[372,290],c0:[90,372],c1:[190,372],c2:[290,372],d0:[18,20],d1:[372,20]};
+function lineSum(cells,id){ var tt=0,ss=LINE_DEF[id];
+  for(var i=0;i<ss.length;i++){ var v=cells[ss[i]]; if(!v) return null; tt+=v; } return tt; }
+var FF=' font-family=\'"Songti SC","Source Han Serif SC","Noto Serif CJK SC","SimSun","STSong",Georgia,serif\'';
+
+function boardSVG(cells,opts){
+  opts=opts||{};
+  var vb=(opts.sumMode||opts.sums)?"-6 -6 412 412":"27 27 326 326";
+  var s='<svg class="board" viewBox="'+vb+'" xmlns="http://www.w3.org/2000/svg">';
+  s+='<rect x="40" y="40" width="300" height="300" fill="#fbf8f1" stroke="#d6cdb9" stroke-width="1.6"/>';
+  if(opts.sums){
+    for(var lid in opts.sums){
+      if(!opts.sums[lid]) continue;
+      var g=LINE_GEOM[lid], v=lineSum(cells,lid), col=(v===15)?"#3f7a55":"#9e2b25";
+      s+='<line x1="'+g[0][0]+'" y1="'+g[0][1]+'" x2="'+g[1][0]+'" y2="'+g[1][1]+'" stroke="'+col+'" stroke-width="9" stroke-opacity=".16" stroke-linecap="round"/>';
+    }
+  }
+  for(var k=1;k<3;k++){
+    s+='<line x1="'+(40+k*100)+'" y1="40" x2="'+(40+k*100)+'" y2="340" stroke="#d6cdb9" stroke-width="1"/>';
+    s+='<line x1="40" y1="'+(40+k*100)+'" x2="340" y2="'+(40+k*100)+'" stroke="#d6cdb9" stroke-width="1"/>';
+  }
+  for(var i=0;i<SLOTS.length;i++){
+    var slot=SLOTS[i], rc=SLOT_RC[slot], x=40+rc[1]*100, y=40+rc[0]*100, v=cells[slot];
+    if(opts.badSlots&&opts.badSlots[slot]) s+='<rect x="'+(x+1)+'" y="'+(y+1)+'" width="98" height="98" fill="#9e2b25" fill-opacity=".11"/>';
+    var c=cellXY(slot);
+    if(v){
+      s+=dotsSVG(v,c[0],c[1],7,18);
+      if(opts.showNum) s+='<text x="'+(x+92)+'" y="'+(y+93)+'" text-anchor="end" font-size="19" fill="#7d7566"'+FF+'>'+v+'</text>';
+    }
+    if(opts.interactive) s+='<rect class="hit" data-slot="'+slot+'" x="'+x+'" y="'+y+'" width="100" height="100" fill="transparent" style="cursor:pointer"/>';
+  }
+  s+='<rect x="40" y="40" width="300" height="300" fill="none" stroke="#1c1a17" stroke-width="1.8"/>';
+  if(opts.sumMode){
+    for(var l2 in LINE_GEOM){
+      if(opts.sums&&opts.sums[l2]) continue;
+      var gg=LINE_GEOM[l2];
+      s+='<line class="sumhit" data-line="'+l2+'" data-cand="'+(opts.candKey||"")+'" x1="'+gg[0][0]+'" y1="'+gg[0][1]+'" x2="'+gg[1][0]+'" y2="'+gg[1][1]+'" stroke="#1c1a17" stroke-opacity="0" stroke-width="26" stroke-linecap="round" style="cursor:pointer"/>';
+    }
+  }
+  if(opts.sums){
+    for(var l3 in opts.sums){
+      if(!opts.sums[l3]) continue;
+      var p=SUM_POS[l3], val=lineSum(cells,l3), c2=(val===15)?"#3f7a55":"#9e2b25";
+      s+='<text x="'+p[0]+'" y="'+(p[1]+9)+'" text-anchor="middle" font-size="26" font-weight="600" fill="'+c2+'"'+FF+'>'+val+'</text>';
+    }
+  }
+  return s+'</svg>';
+}
+function compass(inner){
+  return '<div class="compass"><span class="cn n-s">'+t("dirS")+'</span><span class="cn n-e">'+t("dirE")+'</span>'
+    +'<div class="bd">'+inner+'</div><span class="cn n-w">'+t("dirW")+'</span><span class="cn n-n">'+t("dirN")+'</span></div>';
+}
+
+/* ---- 五方板（第一场） ---- */
+var FIVE_POS={N:[160,252],S:[160,68],E:[68,160],W:[252,160],C:[160,160]};
+function fiveSVG(got,opts){
+  opts=opts||{};
+  var s='<svg class="board" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">';
+  s+='<line x1="160" y1="40" x2="160" y2="280" stroke="#d6cdb9" stroke-width="1"/>';
+  s+='<line x1="40" y1="160" x2="280" y2="160" stroke="#d6cdb9" stroke-width="1"/>';
+  if(opts.ring>=0){
+    var seq=["N","E","S","W"], pts=[];
+    for(var q=0;q<=opts.ring&&q<4;q++) pts.push(FIVE_POS[seq[q]]);
+    if(pts.length>1){
+      var d="M "+pts[0][0]+" "+pts[0][1];
+      for(var q2=1;q2<pts.length;q2++) d+=" L "+pts[q2][0]+" "+pts[q2][1];
+      if(opts.ring>=4) d+=" Z";
+      s+='<path d="'+d+'" fill="none" stroke="#9e2b25" stroke-width="2" stroke-opacity=".55" stroke-linejoin="round"/>';
+    }
+  }
+  var order=["N","S","E","W","C"];
+  for(var i=0;i<order.length;i++){
+    var k=order[i], p=FIVE_POS[k], g=got[k];
+    var lit=(opts.ring>=0)&&(["N","E","S","W"].indexOf(k)>=0)&&(["N","E","S","W"].indexOf(k)<=opts.ring);
+    if(!g){
+      s+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="30" fill="none" stroke="#d6cdb9" stroke-width="1" stroke-dasharray="4 5"/>';
+      continue;
+    }
+    s+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="34" fill="'+(lit?"rgba(158,43,37,.09)":"rgba(28,26,23,.035)")+'"/>';
+    s+=dotsSVG(g.n,p[0],p[1]-6,4.6,12);
+    s+='<text x="'+p[0]+'" y="'+(p[1]+30)+'" text-anchor="middle" font-size="15" fill="'+WX_COLOR[g.wx]+'"'+FF+'>'+t("wx_"+g.wx)+'</text>';
+    if(opts.seasons&&k!=="C")
+      s+='<text x="'+p[0]+'" y="'+(p[1]+45)+'" text-anchor="middle" font-size="11.5" fill="#7d7566"'+FF+'>'+t("season"+k)+'</text>';
+  }
+  return s+'</svg>';
+}
+
+/* ---- 十数图（第二/三场） ---- */
+function tuShiSVG(shown,small){
+  var only=shown||null;
+  var s='<svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:'+(small?250:300)+'px;height:auto;display:block">';
+  s+='<rect x="4" y="4" width="312" height="312" fill="none" stroke="#d6cdb9" stroke-width="1"/>';
+  var grp=[[140,14,40,80],[140,125,40,96],[140,231,40,74],[40,132,78,56],[206,132,80,56]];
+  for(var i=0;i<grp.length;i++)
+    s+='<rect x="'+grp[i][0]+'" y="'+grp[i][1]+'" width="'+grp[i][2]+'" height="'+grp[i][3]+'" rx="6" fill="#1c1a17" fill-opacity=".035"/>';
+  function d(n,x,y){ if(only&&!only[n]) return ""; return dotsSVG(n,x,y,4,11); }
+  s+=d(7,160,34); s+=d(2,160,76);
+  s+=d(5,160,140); s+=d(10,160,190);
+  s+=d(1,160,244); s+=d(6,160,284);
+  s+=d(3,98,160); s+=d(8,58,160);
+  s+=d(4,224,160); s+=d(9,266,160);
+  return s+'</svg>';
+}
+
+/* =========================================================
+   4 · 第一场
+   ========================================================= */
+function a1Intro(){
+  var picked=S.why;
+  return '<div class="scene"><h2 class="act">'+t("a1_act")+'</h2><h3 class="tt">'+t("a1_tt")+'</h3>'
+  +'<div class="narr"><p>'+t("a1_p1")+'</p><p>'+t("a1_p2")+'</p><p>'+t("a1_p3")+'</p><p>'+t("a1_p4")+'</p></div>'
+  +'<div class="quote" style="margin-top:22px">'+t("a1_q")+'</div>'
+  +'<div class="row">'
+  +  '<button class="btn ghost small" onclick="pickWhy(1)">'+t("a1_o1")+'</button>'
+  +  '<button class="btn ghost small" onclick="pickWhy(2)">'+t("a1_o2")+'</button>'
+  +  '<button class="btn ghost small" onclick="pickWhy(3)">'+t("a1_o3")+'</button>'
+  +'</div>'
+  +(picked?'<p class="muted softin" style="margin-top:14px">'+t("a1_r"+picked)+'</p>':'')
+  +'<div class="row">'
+  +  '<button class="btn" '+(picked?"":"disabled")+' onclick="go(\'a1_wall\')">'+t("start")+'</button>'
+  +  '<button class="btn ghost small" onclick="pickWhy(1);go(\'a1_wall\')">'+t("skip")+'</button></div></div>';
+}
+function pickWhy(i){ S.why=i; if(!S.t0) S.t0=Date.now(); render(); }
+
+function wallHTML(){
+  var h='<div class="wall">';
+  for(var i=0;i<7;i++){
+    var mark=S.wall[i];
+    h+='<div class="day '+(DAYS[i]?"hit":"miss")+'"><div class="dl">'+tf("a1w_day",{d:i+1})+'</div>'
+      +'<div class="slot'+(mark?" filled":"")+'" data-day="'+i+'">'+(mark?markSVG(mark,34):"")+'</div>'
+      +'<div class="truth">'+(DAYS[i]?t("a1w_hit"):t("a1w_miss"))+'</div></div>';
+  }
+  return h+'</div>';
+}
+function a1Wall(){
+  var st=S.wangStage;
+  var yangDone=true;
+  for(var i=0;i<7;i++){ if(DAYS[i] && S.wall[i]!=="yang") yangDone=false; }
+  var yinDone=true;
+  for(var j=0;j<7;j++){ if(!DAYS[j] && S.wall[j]!=="yin") yinDone=false; }
+  var h='<div class="scene"><h2 class="act">'+t("a1w_act")+'</h2><h3 class="tt">'+t("a1w_tt")+'</h3>'
+  +'<div class="narr"><p>'+t("a1w_p1")+'</p><p>'+t("a1w_p2")+'</p></div>'
+  + wallHTML()
+  +'<div class="toolslot">'
+  +  '<button class="tk'+(S.wallTool==="yang"?" sel":"")+'" onclick="S.wallTool=\'yang\';render()">'+markSVG("yang",34)+'</button>'
+  +  '<span class="tn">'+t("a1w_tool_yang")+'</span>'
+  +  '<button class="tk'+(S.yinUnlocked?(S.wallTool==="yin"?" sel":""):" locked")+'" '
+  +     (S.yinUnlocked?'onclick="S.wallTool=\'yin\';render()"':'disabled')+'>'+markSVG("yin",34)+'</button>'
+  +  '<span class="tn">'+(S.yinUnlocked?t("a1w_tool_yin"):"？")+'</span>'
+  +'</div>';
+
+  if(st===0){
+    h+='<div class="row"><button class="btn" '+(yangDone?"":"disabled")+' onclick="callWang()">'+t("a1w_call")+'</button></div>';
+  } else if(st===1){
+    h+='<div class="wangbox"><div class="who">'+t("a1w_wang")+'</div><div class="say">'+t("a1w_say1")+'</div></div>'
+     +'<div class="narr" style="margin-top:16px"><p style="color:var(--zhu)">'+t("a1w_bad")+'</p>'
+     +'<p>'+t("a1w_p3")+'</p><p>'+tag("jin")+t("a1w_p4")+'</p></div>'
+     +'<div class="row"><button class="btn" onclick="unlockYin()">'+t("a1w_invent")+'</button></div>';
+  } else if(st===2){
+    h+='<div class="narr" style="margin-top:6px"><p>'+t("a1w_p5")+'</p></div>'
+     +'<div class="row"><button class="btn" '+(yinDone?"":"disabled")+' onclick="callWang2()">'+t("a1w_call")+'</button></div>';
+  } else {
+    h+='<div class="wangbox"><div class="who">'+t("a1w_wang")+'</div><div class="say">'+t("a1w_say2")+'</div></div>'
+     +'<div class="narr softin" style="margin-top:18px"><p class="big">'+t("a1w_done")+'</p>'
+     +'<p>'+tag("jin")+t("a1w_rev")+'</p>'
+     +'<p class="muted">'+tag("ke")+t("a1w_rev2")+'</p></div>'
+     +'<div class="row"><button class="btn" onclick="go(\'a1_cast\')">'+t("next")+'</button></div>';
+  }
+  return h+'</div>';
+}
+function bindWall(){
+  var ns=document.querySelectorAll(".slot[data-day]");
+  for(var i=0;i<ns.length;i++){
+    ns[i].addEventListener("click",function(){
+      var d=parseInt(this.getAttribute("data-day"),10);
+      if(S.wangStage>=3) return;
+      if(S.wall[d]){ delete S.wall[d]; render(); return; }
+      if(S.wallTool==="yin" && !S.yinUnlocked) return;
+      S.wall[d]=S.wallTool; render();
+    });
+  }
+}
+function callWang(){ S.wangStage=1; render(); }
+function unlockYin(){ S.yinUnlocked=true; S.wallTool="yin"; S.wangStage=2; render(); }
+function callWang2(){ S.wangStage=3; render(); }
+
+/* ---- 万物海选 ---- */
+function castGotBoard(){
+  var g={};
+  for(var k in S.castGot) g[k]=S.castGot[k];
+  return g;
+}
+function a1Cast(){
+  var idx=S.castIdx;
+  if(idx>=CAST.length) return a1Fin();
+  var R=CAST[idx];
+  var h='<div class="scene"><h2 class="act">'+t("a1c_act")+'</h2><h3 class="tt">'+t("a1c_tt")+'</h3>';
+  if(idx===0) h+='<p class="narr">'+t("a1c_intro")+'</p>';
+  h+='<div class="play"><div class="boardcol">'+compass(fiveSVG(castGotBoard(),{}))+'</div>'
+   +'<div class="side" style="flex:1 1 380px;max-width:none"><div class="castwrap">'
+   +'<span class="stepbadge">'+tf("a1c_round",{i:idx+1})+'</span>'
+   +'<div style="display:flex;gap:12px;align-items:center;margin-bottom:6px">'
+   +  '<svg viewBox="0 0 90 44" style="width:90px;height:44px">'+dotsSVG(R.n,45,22,5,13)+'</svg>'
+   +'</div>';
+
+  if(R.mode==="pick"){
+    h+='<p class="narr">'+t("a1c_"+R.n+"_q")+'</p>'
+     +'<div class="crit"><h4>'+t("a1c_crit")+'</h4><ul style="margin:0;padding:0">'
+     +'<li>'+t("a1c_"+R.n+"_crit1")+'</li><li>'+t("a1c_"+R.n+"_crit2")+'</li><li>'+t("a1c_"+R.n+"_crit3")+'</li></ul></div>'
+     +'<p class="muted">'+t("a1c_pickhint")+'</p><div class="opts">';
+    for(var i=0;i<R.opts.length;i++){
+      var o=R.opts[i], out=!!S.castOut[R.n+":"+o], win=(S.castGot[R.slot]&&o===R.ans);
+      h+='<div class="opt'+(win?" win":(out?" out":""))+'" data-opt="'+o+'">'
+       +'<span class="gl"><svg viewBox="0 0 24 24" style="width:22px;height:22px"><circle cx="12" cy="12" r="8" fill="'
+       +OPT_HUE[o]+'" fill-opacity="'+(out?".22":".8")+'"/></svg></span>'
+       +'<span class="nm">'+t("opt_"+o)+'</span>'
+       +'<span class="rs">'+(win?t("ok_"+o):(out?t("why_"+o):"&nbsp;"))+'</span></div>';
+    }
+    h+='</div>';
+  }
+  else if(R.mode==="combo"){
+    var a=!!S.comboSel.water, b=!!S.comboSel.fire, ok=!!S.castGot[R.slot];
+    h+='<p class="narr">'+t("a1c_3_q")+'</p><p class="muted">'+t("a1c_3_hint")+'</p>'
+     +'<div class="combo">'
+     +'<div class="cell'+(a?" sel":"")+'" onclick="comboPick(\'water\')"><svg viewBox="0 0 60 60">'+dotsSVG(1,30,30,6,15)+'</svg></div>'
+     +'<span class="op">+</span>'
+     +'<div class="cell'+(b?" sel":"")+'" onclick="comboPick(\'fire\')"><svg viewBox="0 0 60 60">'+dotsSVG(2,30,30,6,15)+'</svg></div>'
+     +'<span class="op">=</span>'
+     +'<div class="cell'+(ok?"":" dim")+'"><svg viewBox="0 0 60 60">'+(ok?dotsSVG(3,30,30,6,15):"")+'</svg></div>'
+     +'</div>'
+     +(ok?'<p class="softin">'+tag("jin")+t("a1c_3_ok")+'</p>':'');
+  }
+  else if(R.mode==="split"){
+    var sp=S.splitDone, tried=Object.keys(S.splitTried).length;
+    h+='<p class="narr">'+t("a1c_4_q")+'</p><p class="muted">'+t("a1c_4_hint")+'</p>'
+     +'<div class="splitbox"><div class="sc"><svg viewBox="0 0 70 70">'+dotsSVG(4,35,35,6,16)+'</svg>'
+     +'<div class="cap">4</div></div>';
+    if(sp){
+      h+='<span class="op" style="font-size:20px;color:var(--ink3)">→</span>'
+       +'<div class="sc softin"><svg viewBox="0 0 70 70">'+dotsSVG(2,35,35,6,16)+'</svg><div class="cap">2</div></div>'
+       +'<div class="sc softin"><svg viewBox="0 0 70 70">'+dotsSVG(2,35,35,6,16)+'</svg><div class="cap">2</div></div>';
+    }
+    h+='</div>';
+    if(!sp) h+='<div class="row"><button class="btn small" onclick="doSplit()">'+t("a1c_4_split")+'</button></div>';
+    else{
+      h+='<p class="softin">'+tag("jin")+t("a1c_4_after")+'</p><p class="muted">'+t("a1c_4_try")+'</p><div class="trybar">';
+      [1,2,3].forEach(function(x){
+        h+='<button class="'+(S.splitTried[x]?"tried":"")+'" onclick="trySplit('+x+')">'+x+(S.splitTried[x]?" · "+t("a1c_4_no"):"")+'</button>';
+      });
+      h+='</div>'+(tried>=1?'<p class="softin" style="color:var(--qing)">'+t("a1c_4_yes")+'</p>':'');
+    }
+  }
+  else if(R.mode==="decomp"){
+    var d1=!!S.decomp.a, d2=!!S.decomp.b;
+    h+='<p class="narr">'+t("a1c_5_q")+'</p><p class="muted">'+t("a1c_5_hint")+'</p>'
+     +'<div class="splitbox"><div class="sc"><svg viewBox="0 0 70 70">'+dotsSVG(5,35,35,6,15)+'</svg><div class="cap">5</div></div></div>'
+     +'<div class="trybar"><button class="'+(d1?"tried":"")+'" onclick="doDecomp(\'a\')">'+t("a1c_5_b1")+(d1?" · "+t("a1c_5_r1"):"")+'</button>'
+     +'<button class="'+(d2?"tried":"")+'" onclick="doDecomp(\'b\')">'+t("a1c_5_b2")+(d2?" · "+t("a1c_5_r2"):"")+'</button></div>'
+     +((d1&&d2)?'<p class="softin">'+tag("jin")+t("a1c_5_after")+'</p>':'');
+  }
+
+  if(S.castGot[R.slot])
+    h+='<div class="quote softin" style="border-left-color:var(--zhu);margin-top:16px">'+tag("gu")+t("got_"+R.n)+'</div>'
+     +'<div class="row"><button class="btn" onclick="nextCast()">'+(idx===4?t("next"):t("cont"))+'</button></div>';
+  return h+'</div></div></div></div>';
+}
+function bindCast(){
+  var ns=document.querySelectorAll(".opt[data-opt]");
+  for(var i=0;i<ns.length;i++){
+    ns[i].addEventListener("click",function(){
+      var R=CAST[S.castIdx]; if(!R||R.mode!=="pick") return;
+      if(S.castGot[R.slot]) return;
+      var o=this.getAttribute("data-opt");
+      if(S.castOut[R.n+":"+o]) return;
+      if(o===R.ans) S.castGot[R.slot]={n:R.n,wx:R.wx};
+      else S.castOut[R.n+":"+o]=true;
+      render();
+    });
+  }
+}
+function comboPick(k){
+  var R=CAST[S.castIdx]; if(!R||R.mode!=="combo") return;
+  S.comboSel[k]=true;
+  if(S.comboSel.water&&S.comboSel.fire) S.castGot[R.slot]={n:R.n,wx:R.wx};
+  render();
+}
+function doSplit(){ S.splitDone=true; render(); }
+function trySplit(x){
+  S.splitTried[x]=true;
+  var R=CAST[S.castIdx];
+  if(Object.keys(S.splitTried).length>=1) S.castGot[R.slot]={n:R.n,wx:R.wx};
+  render();
+}
+function doDecomp(k){
+  S.decomp[k]=true;
+  var R=CAST[S.castIdx];
+  if(S.decomp.a&&S.decomp.b) S.castGot[R.slot]={n:R.n,wx:R.wx};
+  render();
+}
+function nextCast(){
+  S.castIdx++;
+  if(S.castIdx>=CAST.length){ S.ringStep=-1; go("a1_fin"); }   // 环形动画由 render 统一启动，避免双计时器
+  else render();
+}
+
+/* ---- 第一场结算：四时闭环 ---- */
+var ringTimer=null;
+function startRing(){
+  if(ringTimer) clearInterval(ringTimer);
+  S.ringStep=-1;
+  ringTimer=setInterval(function(){
+    if(S.scene!=="a1_fin"){ clearInterval(ringTimer); ringTimer=null; return; }
+    S.ringStep++;
+    var box=el("ringbox");
+    if(box) box.innerHTML=compass(fiveSVG(castGotBoard(),{ring:S.ringStep,seasons:true}));
+    if(S.ringStep>=4){ clearInterval(ringTimer); ringTimer=null;
+      var lb=el("ringlab"); if(lb){ lb.style.opacity=1; }
+      var tail=el("ringtail"); if(tail){ tail.style.display="block"; }
+    }
+  },780);
+}
+function a1Fin(){
+  return '<div class="scene center fin" style="max-width:520px">'
+  +'<h2 class="act">'+t("a1f_act")+'</h2><h3 class="tt">'+t("a1f_tt")+'</h3>'
+  +'<p class="muted">'+t("a1f_p1")+'</p>'
+  +'<div id="ringbox" style="max-width:340px;margin:0 auto">'+compass(fiveSVG(castGotBoard(),{ring:-1,seasons:true}))+'</div>'
+  +'<p class="muted softin" id="ringlab" style="opacity:0;margin-top:10px">'+t("a1f_ring")+'</p>'
+  +'<div id="ringtail" style="display:none" class="softin">'
+  +  '<p class="big">'+t("a1f_p2")+'</p><hr class="rule2">'
+  +  '<p class="muted">'+t("a1f_list")+'</p><p class="big">'+t("a1f_items")+'</p>'
+  +  '<p class="big" style="color:var(--zhu)">'+t("a1f_p3")+'</p>'
+  +  '<div class="row" style="justify-content:center"><button class="btn" onclick="toAct2()">'+t("a1f_next")+'</button></div>'
+  +'</div></div>';
+}
+function toAct2(){ if(ringTimer){clearInterval(ringTimer);ringTimer=null;} go("a2_main"); }
+
+/* =========================================================
+   5 · 第二场
+   ========================================================= */
+var PLUS=[{a:1,b:6,wx:"water"},{a:2,b:7,wx:"fire"},{a:3,b:8,wx:"wood"},{a:4,b:9,wx:"metal"},{a:5,b:10,wx:"earth"}];
+function shownSet(){
+  var o={1:1,2:1,3:1,4:1,5:1};
+  for(var i=0;i<PLUS.length;i++){ if(S.plus[PLUS[i].a]) o[PLUS[i].b]=1; }
+  return o;
+}
+function a2Main(){
+  var n=0; for(var k in S.plus) if(S.plus[k]) n++;
+  var done=(n===5);
+  var h='<div class="scene"><h2 class="act">'+t("a2_act")+'</h2><h3 class="tt">'+t("a2_tt")+'</h3>'
+  +'<div class="narr"><p>'+t("a2_p1")+'</p><p>'+tag("jin")+t("a2_p2")+'</p></div>'
+  +'<div class="play"><div class="boardcol">'+tuShiSVG(shownSet())+'</div>'
+  +'<div class="side" style="flex:1 1 400px;max-width:none">'
+  +'<p class="muted">'+t("a2_hint")+'</p><div class="plusrows">';
+  for(var i=0;i<PLUS.length;i++){
+    var p=PLUS[i], d=!!S.plus[p.a];
+    h+='<div class="prow'+(d?" done":"")+'">'
+     +'<span class="g"><svg viewBox="0 0 56 40">'+dotsSVG(p.a,28,20,4.4,11)+'</svg></span>'
+     +(d?'<span class="arrow">→</span>':'<button class="pbtn" onclick="doPlus('+p.a+')">'+t("a2_btn")+'</button>')
+     +'<span class="res">'+(d?'<svg viewBox="0 0 72 42" class="softin">'+dotsSVG(p.b,36,21,4.4,11)+'</svg>':'')+'</span>'
+     +'<span class="note">'+(d?tf("a2_note",{a:p.a,b:p.b,wx:t("wx_"+p.wx),p:(p.a%2===1?t("a2_flip"):t("a2_flip2"))}):'&nbsp;')+'</span>'
+     +'</div>';
+  }
+  h+='</div>';
+  if(done){
+    h+='<div class="softin" style="margin-top:18px">'
+     +'<p>'+t("a2_done_p1")+'</p>'
+     +'<div class="sumline"><span>'+t("a2_t1")+' <b>55</b></span><span>'+t("a2_t2")+' <b>25</b></span><span>'+t("a2_t3")+' <b>30</b></span></div>'
+     +'<p class="quote" style="margin-top:16px">'+tag("gu")+t("a2_verse")+'<br><span class="muted" style="font-size:12.5px">'+t("a2_versenote")+'</span></p>'
+     +'<p>'+tag("jin")+t("a2_p3")+'</p>'
+     +'<div class="row"><button class="btn" onclick="go(\'a3_intro\')">'+t("a2_next")+'</button></div></div>';
+  }
+  return h+'</div></div></div>';
+}
+function doPlus(a){ S.plus[a]=true; render(); }
+
+/* =========================================================
+   6 · 第三场
+   ========================================================= */
+function a3Intro(){
+  return '<div class="scene"><h2 class="act">'+t("a3_act")+'</h2><h3 class="tt">'+t("a3_tt")+'</h3>'
+  +'<div class="play"><div class="boardcol" style="max-width:280px">'+tuShiSVG(null,true)
+  +'<div class="muted center" style="margin-top:6px">'+t("a3_lab_tushi")+'</div></div>'
+  +'<div class="side" style="flex:1 1 380px;max-width:none"><div class="narr">'
+  +'<p>'+t("a3_p1")+'</p><p>'+tag("jin")+t("a3_p2")+'</p><p>'+t("a3_p3")+'</p>'
+  +'<p class="muted">'+tag("ke")+t("a3_p4")+'</p></div>'
+  +'<div class="row"><button class="btn" onclick="go(\'a3_s1\')">'+t("start")+'</button></div>'
+  +'</div></div></div>';
+}
+var WX_L=["water","fire","metal","wood","earth"];
+var WX_R=["metal","earth","water","fire","wood"];
+var KE={water:"fire",fire:"metal",metal:"wood",wood:"earth",earth:"water"};
+function wxSVG(){
+  var W=440,H=430, lx=78, rx=362, top=52, gap=76;
+  var s='<svg class="wx" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:440px;height:auto;display:block;margin:8px auto 0">';
+  s+='<text x="'+lx+'" y="24" text-anchor="middle" font-size="13" fill="#7d7566"'+FF+'>'+t("s1_left")+'</text>';
+  s+='<text x="'+rx+'" y="24" text-anchor="middle" font-size="13" fill="#7d7566"'+FF+'>'+t("s1_right")+'</text>';
+  for(var a in S.link){
+    var i1=WX_L.indexOf(a), i2=WX_R.indexOf(S.link[a]);
+    var y1=top+i1*gap, y2=top+i2*gap, mx=(lx+rx)/2, my=(y1+y2)/2;
+    s+='<line x1="'+(lx+34)+'" y1="'+y1+'" x2="'+(rx-34)+'" y2="'+y2+'" stroke="'+WX_COLOR[a]+'" stroke-width="2" stroke-opacity=".8"/>';
+    s+='<circle cx="'+mx+'" cy="'+my+'" r="11" fill="#f4efe4" stroke="'+WX_COLOR[a]+'" stroke-width="1"/>';
+    s+='<text x="'+mx+'" y="'+(my+5)+'" text-anchor="middle" font-size="12" fill="'+WX_COLOR[a]+'"'+FF+'>'+t("s1_ke")+'</text>';
+  }
+  function chip(k,cx,cy,side){
+    var done=(side==="L")?!!S.link[k]:(function(){for(var q in S.link){if(S.link[q]===k)return true}return false})();
+    var selc=(side==="L"&&S.linkSel===k);
+    var fill=done?"rgba(28,26,23,.05)":"#fbf8f1";
+    var strk=selc?"#9e2b25":(done?WX_COLOR[k]:"#d6cdb9");
+    var sw=selc?2.4:(done?1.6:1.2);
+    var label=t("wx_"+k), fs=(LANG!=="en")?26:14;
+    var g='<g class="wxchip" data-side="'+side+'" data-wx="'+k+'"'+(done&&side==="L"?' opacity=".45"':'')+'>';
+    g+='<rect x="'+(cx-34)+'" y="'+(cy-26)+'" width="68" height="52" rx="3" fill="'+fill+'" stroke="'+strk+'" stroke-width="'+sw+'"/>';
+    g+='<text x="'+cx+'" y="'+(cy+(LANG!=="en"?9:5))+'" text-anchor="middle" font-size="'+fs+'" fill="'+WX_COLOR[k]+'"'+FF+'>'+label+'</text>';
+    return g+'</g>';
+  }
+  for(var i=0;i<5;i++) s+=chip(WX_L[i],lx,top+i*gap,"L");
+  for(var j=0;j<5;j++) s+=chip(WX_R[j],rx,top+j*gap,"R");
+  return s+'</svg>';
+}
+function a3S1(){
+  var n=Object.keys(S.link).length;
+  return '<div class="scene"><h2 class="act">'+t("s1_act")+'</h2><h3 class="tt">'+t("s1_tt")+'</h3>'
+  +'<div class="play"><div class="boardcol"><div id="wxbox">'+wxSVG()+'</div></div>'
+  +'<div class="side"><div class="narr"><p>'+tag("jin")+t("s1_p1")+'</p><p class="muted">'+t("s1_p2")+'</p>'
+  +'<p style="margin-top:18px">'+tag("gu")+t("s1_p3")+'</p></div>'
+  +'<div class="sysline">'+tf("s1_count",{n:n})+'</div>'
+  +'<div class="row"><button class="btn" '+(n<5?"disabled":"")+' onclick="toS2()">'+t("next")+'</button></div>'
+  +'</div></div></div>';
+}
+function bindWx(){
+  var box=el("wxbox"); if(!box) return;
+  var ns=box.querySelectorAll(".wxchip");
+  for(var i=0;i<ns.length;i++){
+    ns[i].addEventListener("click",function(){
+      var side=this.getAttribute("data-side"), wx=this.getAttribute("data-wx");
+      if(side==="L"){ if(S.link[wx]) return; S.linkSel=(S.linkSel===wx)?null:wx; }
+      else{
+        if(!S.linkSel) return;
+        var taken=false; for(var q in S.link){ if(S.link[q]===wx) taken=true; }
+        if(taken){ S.linkSel=null; }
+        else if(KE[S.linkSel]===wx){ S.link[S.linkSel]=wx; S.linkSel=null; }
+        else{ S.linkSel=null; var b=el("wxbox"); if(b){b.classList.add("shake"); setTimeout(function(){b.classList.remove("shake")},420);} }
+      }
+      render();
+    });
+  }
+}
+function toS2(){ S.cells={}; S.tray=[1,3,5,7,9]; S.sel=null; S.autoDone=false; go("a3_s2"); }
+
+function ruleState(kind){
+  var c=S.cells;
+  if(kind==="R1"){ if(c.C===5) return "good"; if(c.C) return "bad"; return "pending"; }
+  if(kind==="R2"||kind==="R3"){
+    var a=(kind==="R2")?1:3, b=(kind==="R2")?9:7, sa=null, sb=null;
+    for(var s0 in c){ if(c[s0]===a) sa=s0; if(c[s0]===b) sb=s0; }
+    if(sa&&sb) return (OPP[sa]===sb)?"good":"bad";
+    return "pending";
+  }
+  if(kind==="R4"){
+    if(c.N===1&&c.E===3) return "good";
+    if((c.N&&c.N!==1)||(c.E&&c.E!==3)) return "bad";
+    return "pending";
+  }
+  if(kind==="R5"){
+    var st="good", prs=[[2,8],[4,6]];
+    for(var i=0;i<prs.length;i++){
+      var pa=null,pb=null;
+      for(var s1 in c){ if(c[s1]===prs[i][0]) pa=s1; if(c[s1]===prs[i][1]) pb=s1; }
+      if(pa&&pb){ if(OPP[pa]!==pb) return "bad"; } else st="pending";
+    }
+    return st;
+  }
+  if(kind==="R6"){
+    var placed=0, ok=0;
+    for(var i2=0;i2<CORNERS.length;i2++){
+      var cn=CORNERS[i2], v=c[cn]; if(!v) continue;
+      placed++;
+      var mate=WX_MATE[v], adj=CORNER_ADJ[cn], hit=false, unknown=false;
+      for(var j=0;j<adj.length;j++){ if(c[adj[j]]===mate) hit=true; if(!c[adj[j]]) unknown=true; }
+      if(hit) ok++; else if(!unknown) return "bad";
+    }
+    return (placed===4&&ok===4)?"good":"pending";
+  }
+  return "pending";
+}
+function badSlots(){
+  var c=S.cells, out={};
+  if(c.C&&c.C!==5) out.C=1;
+  var prs=[[1,9],[3,7],[2,8],[4,6]];
+  for(var i=0;i<prs.length;i++){
+    var pa=null,pb=null;
+    for(var s in c){ if(c[s]===prs[i][0]) pa=s; if(c[s]===prs[i][1]) pb=s; }
+    if(pa&&pb&&OPP[pa]!==pb){ out[pa]=1; out[pb]=1; }
+  }
+  if(c.N&&c.N!==1) out.N=1;
+  if(c.E&&c.E!==3) out.E=1;
+  for(var k=0;k<EDGES.length;k++){ var v=c[EDGES[k]]; if(v&&v%2===0) out[EDGES[k]]=1; }
+  for(var k2=0;k2<CORNERS.length;k2++){ var v2=c[CORNERS[k2]]; if(v2&&v2%2===1) out[CORNERS[k2]]=1; }
+  for(var i3=0;i3<CORNERS.length;i3++){
+    var cn=CORNERS[i3], vv=c[cn]; if(!vv) continue;
+    var mate=WX_MATE[vv], adj=CORNER_ADJ[cn], hit=false, unknown=false;
+    for(var j2=0;j2<adj.length;j2++){ if(c[adj[j2]]===mate) hit=true; if(!c[adj[j2]]) unknown=true; }
+    if(!hit&&!unknown) out[cn]=1;
+  }
+  return out;
+}
+function sameCells(a,b){ for(var i=0;i<SLOTS.length;i++){ if(a[SLOTS[i]]!==b[SLOTS[i]]) return false; } return true; }
+
+function trayHTML(label){
+  var h='<div class="tray'+(S.tray.length?"":" empty")+'"><span class="lab">'+label+'</span>';
+  if(!S.tray.length) h+='<span class="muted" style="padding-left:4px">'+t("trayEmpty")+'</span>';
+  for(var i=0;i<S.tray.length;i++){
+    var n=S.tray[i];
+    h+='<button class="chip'+(S.sel===n?" sel":"")+'" data-n="'+n+'" draggable="true">'+chipSVG(n)
+     +(S.showNum?'<span class="num">'+n+'</span>':'')+'</button>';
+  }
+  return h+'</div>';
+}
+function ruleHTML(keys,kinds){
+  var h='<div class="rules"><h4>'+t("rules_hd")+'</h4>';
+  for(var i=0;i<keys.length;i++){
+    var k=keys[i], st=ruleState(k), mk=(st==="good")?"✓":((st==="bad")?"✕":"○");
+    h+='<div class="rule '+st+'" id="rule-'+k+'"><span class="mk">'+mk+'</span><span class="txt">'+tag(kinds[i])+t(k)+'</span></div>';
+  }
+  return h+'</div>';
+}
+function toolbarHTML(){
+  return '<div class="toolbar"><label class="switch"><input type="checkbox" '+(S.showNum?"checked":"")
+   +' onchange="toggleNum(this)">'+t("showNum")+'</label>'
+   +'<button class="btn ghost small" onclick="giveUp()">'+t("giveUp")+'</button>'
+   +'<span class="muted">'+tf("statLine",{a:S.giveUps,b:S.bad})+'</span></div>';
+}
+function a3S2(){
+  var done=["R1","R2","R3","R4"].every(function(k){return ruleState(k)==="good";})&&S.tray.length===0;
+  return '<div class="scene"><h2 class="act">'+t("s2_act")+'</h2><h3 class="tt">'+t("s2_tt")+'</h3>'
+  +'<p class="narr">'+tag("jin")+t("s2_p1")+'</p>'
+  +'<div class="play"><div class="boardcol">'
+  + compass(boardSVG(S.cells,{interactive:true,badSlots:badSlots(),showNum:S.showNum}))
+  + trayHTML(t("s2_tray")) + toolbarHTML()
+  +'</div><div class="side">'+ruleHTML(["R1","R2","R3","R4"],["jin","jin","jin","gu"])
+  +'<div class="sysline" id="sysmsg"></div>'
+  +(S.autoDone?'<div class="aside" id="aside1"><span class="hd" onclick="document.getElementById(\'aside1\').classList.toggle(\'open\')">'
+      +t("asideHd")+'</span><div class="bd2">'+tag("gu")+t("asideBd")+'</div></div>':'')
+  +'<div class="row"><button class="btn" '+(done?"":"disabled")+' onclick="toS3()">'+t("next")+'</button></div>'
+  +'</div></div></div>';
+}
+function a3S3(){
+  var done=ruleState("R5")==="good"&&ruleState("R6")==="good"&&S.tray.length===0;
+  return '<div class="scene"><h2 class="act">'+t("s3_act")+'</h2><h3 class="tt">'+t("s3_tt")+'</h3>'
+  +'<p class="narr">'+t("s3_p1")+'</p>'
+  +'<div class="play"><div class="boardcol">'
+  + compass(boardSVG(S.cells,{interactive:true,badSlots:badSlots(),showNum:S.showNum}))
+  + trayHTML(t("s3_tray")) + toolbarHTML()
+  +'</div><div class="side">'+ruleHTML(["R5","R6"],["jin","gu"])
+  +'<div class="sysline" id="sysmsg"></div>'
+  +'<div class="row"><button class="btn" '+(done?"":"disabled")+' onclick="toS4()">'+t("next")+'</button></div>'
+  +'</div></div></div>';
+}
+function toggleNum(cb){ S.showNum=cb.checked; render(); }
+function place(slot){
+  if(S.sel==null) return;
+  var n=S.sel, zone=(S.scene==="a3_s2")?EDGES.concat(["C"]):CORNERS;
+  if(zone.indexOf(slot)<0){ flash(t("zoneMsg")); return; }
+  if(S.cells[slot]){ S.tray.push(S.cells[slot]); S.tray.sort(function(a,b){return a-b}); delete S.cells[slot]; }
+  S.cells[slot]=n;
+  S.tray=S.tray.filter(function(x){return x!==n});
+  S.sel=null;
+  if(badSlots()[slot]) S.bad++;
+  render(); maybeAuto();
+}
+function pickUp(slot){
+  if(!S.cells[slot]) return;
+  var zone=(S.scene==="a3_s2")?EDGES.concat(["C"]):CORNERS;
+  if(zone.indexOf(slot)<0) return;
+  S.tray.push(S.cells[slot]); S.tray.sort(function(a,b){return a-b});
+  delete S.cells[slot]; S.sel=null; render();
+}
+function flash(msg){
+  var m=el("sysmsg"); if(!m) return;
+  m.textContent=msg; m.classList.add("warn");
+  setTimeout(function(){ var m2=el("sysmsg"); if(m2){m2.textContent="";m2.classList.remove("warn");} },2200);
+}
+function maybeAuto(){
+  if(S.scene!=="a3_s2"||S.autoDone) return;
+  if(S.cells.C===5&&S.cells.N===1&&S.cells.E===3&&S.tray.indexOf(9)>=0&&S.tray.indexOf(7)>=0&&!S.cells.S&&!S.cells.W){
+    S.autoDone=true;
+    setTimeout(function(){
+      S.cells.S=9; S.cells.W=7;
+      S.tray=S.tray.filter(function(x){return x!==9&&x!==7});
+      render();
+      var m=el("sysmsg"); if(m) m.textContent=t("autoMsg");
+    },520);
+  }
+}
+function giveUp(){
+  S.giveUps++;
+  var keys=(S.scene==="a3_s2")?["R1","R2","R3","R4"]:["R5","R6"];
+  var badK=keys.filter(function(k){return ruleState(k)==="bad";});
+  var pend=keys.filter(function(k){return ruleState(k)==="pending";});
+  var zone=(S.scene==="a3_s2")?EDGES.concat(["C"]):CORNERS;
+  var bs=badSlots(), returned=0;
+  for(var s in bs){
+    if(zone.indexOf(s)<0) continue;
+    if(S.cells[s]!==undefined){ S.tray.push(S.cells[s]); delete S.cells[s]; returned++; }
+  }
+  S.tray.sort(function(a,b){return a-b});
+  if(S.scene==="a3_s2"&&S.giveUps>=2&&S.cells.C!==5&&S.tray.indexOf(5)>=0){
+    S.cells.C=5; S.tray=S.tray.filter(function(x){return x!==5;}); returned=returned||1;
+  }
+  render();
+  var hit=badK.length?badK:pend;
+  for(var i=0;i<hit.length;i++){
+    var node=el("rule-"+hit[i]);
+    if(node){ node.classList.add("pulse"); (function(nd){setTimeout(function(){nd.classList.remove("pulse")},1800);})(node); }
+  }
+  var m=el("sysmsg"); if(m) m.textContent=returned?t("giveMsg1"):t("giveMsg2");
+}
+function toS3(){ S.tray=[2,4,6,8]; S.sel=null; go("a3_s3"); }
+function toS4(){
+  S.built=sameCells(S.cells,CAND_YI)?"yi":(sameCells(S.cells,CAND_JIA)?"jia":null);
+  go("a3_s4");
+}
+function candBlock(key,cells,opts){
+  opts=opts||{};
+  var mine=(S.built===key);
+  return '<div class="cand'+(opts.cls?(" "+opts.cls):"")+'" id="cand-'+key+'">'
+   +'<h5>'+(key==="jia"?t("candJia"):t("candYi"))+(mine?'<span class="mine">'+t("candMine")+'</span>':'')+'</h5>'
+   +compass(boardSVG(cells,{showNum:S.showNum,sumMode:opts.sumMode,sums:opts.sums,candKey:key}))
+   +'<div class="verdict '+(opts.vclass||"")+'">'+(opts.verdict||"&nbsp;")+'</div></div>';
+}
+function a3S4(){
+  return '<div class="scene"><h2 class="act">'+t("s4_act")+'</h2><h3 class="tt">'+t("s4_tt")+'</h3>'
+  +'<p class="narr">'+t("s4_p1")+'</p>'
+  +'<div class="pair">'+candBlock("jia",CAND_JIA)+candBlock("yi",CAND_YI)+'</div>'
+  +'<div class="quote big" style="margin-top:22px">'+t("s4_q1")+'<br>'
+  +'<span class="muted" style="font-size:15px">'+tag("jin")+t("s4_q2")+'</span></div>'
+  +'<div class="row"><label class="switch"><input type="checkbox" '+(S.showNum?"checked":"")
+  +' onchange="toggleNum(this)">'+t("showNum")+'</label><span style="flex:1"></span>'
+  +'<button class="btn" onclick="toS5()">……</button></div></div>';
+}
+function toS5(){ S.sums={jia:{},yi:{}}; S.settled=false; go("a3_s5"); }
+function allSummed(k){ var n=0; for(var i in S.sums[k]) if(S.sums[k][i]) n++; return n===8; }
+function a3S5(){
+  var jd=allSummed("jia"), yd=allSummed("yi"), settled=jd&&yd&&S.settled;
+  var vJ=jd?{verdict:t("s5_vJ"),vclass:"no",cls:settled?"fail":""}:{};
+  var vY=yd?{verdict:t("s5_vY"),vclass:"yes",cls:settled?"win":""}:{};
+  vJ.sumMode=!jd; vJ.sums=S.sums.jia; vY.sumMode=!yd; vY.sums=S.sums.yi;
+  return '<div class="scene"><h2 class="act">'+t("s5_act")+'</h2><h3 class="tt">'+t("s5_tt")+'</h3>'
+  +'<div class="quote big" style="border-left-color:var(--zhu)">'+t("s5_hint")+'</div>'
+  +'<p class="muted">'+t("s5_p1")+'</p>'
+  +'<div class="pair">'+candBlock("jia",CAND_JIA,vJ)+candBlock("yi",CAND_YI,vY)+'</div>'
+  +'<div class="row"><button class="btn ghost small" onclick="sumAll()">'+t("s5_all")+'</button>'
+  +'<label class="switch"><input type="checkbox" '+(S.showNum?"checked":"")+' onchange="toggleNum(this)">'+t("showNum")+'</label></div>'
+  +(settled?'<div class="softin" style="margin-top:26px;border-top:1px solid var(--line);padding-top:22px">'
+    +'<p class="big">'+t("s5_r1")+'</p>'
+    +'<p class="muted">'+tag("ke")+t("s5_r2")+'</p>'
+    +'<p class="quote big" style="border-left-color:var(--zhu)">'+tag("gu")+t("s5_r3")+'</p>'
+    +'<div class="row"><button class="btn" onclick="go(\'a3_end\')">'+t("s5_close")+'</button></div></div>':'')
+  +'</div>';
+}
+function sumAll(){ for(var l in LINE_GEOM){ S.sums.jia[l]=true; S.sums.yi[l]=true; } render(); }
+function bindSums(){
+  var hits=document.querySelectorAll(".sumhit");
+  for(var i=0;i<hits.length;i++){
+    hits[i].addEventListener("click",function(){
+      var k=this.getAttribute("data-cand"), l=this.getAttribute("data-line");
+      if(!k||!S.sums[k]) return;
+      S.sums[k][l]=true; render();
+    });
+  }
+}
+function cellsToGrid(c){ var g=[[0,0,0],[0,0,0],[0,0,0]]; for(var s in SLOT_RC){ var rc=SLOT_RC[s]; g[rc[0]][rc[1]]=c[s]; } return g; }
+function gridToCells(g){ var c={}; for(var s in SLOT_RC){ var rc=SLOT_RC[s]; c[s]=g[rc[0]][rc[1]]; } return c; }
+function rotG(g){ return [[g[2][0],g[1][0],g[0][0]],[g[2][1],g[1][1],g[0][1]],[g[2][2],g[1][2],g[0][2]]]; }
+function mirG(g){ return [g[0].slice().reverse(),g[1].slice().reverse(),g[2].slice().reverse()]; }
+function eightVariants(){ var base=cellsToGrid(CAND_YI), out=[], cur=base;
+  for(var i=0;i<4;i++){ out.push(cur); out.push(mirG(cur)); cur=rotG(cur); } return out; }
+var VARS=null, spinTimer=null, spinIdx=0;
+function fmtTime(ms){
+  var s=Math.max(0,Math.round(ms/1000)), m=Math.floor(s/60); s=s%60;
+  return LANG!=="en" ? (m+" 分 "+(s<10?"0":"")+s+" 秒") : (m+"m "+(s<10?"0":"")+s+"s");
+}
+function a3End(){
+  return '<div class="scene center fin">'
+  +'<div id="spin" style="max-width:340px;margin:0 auto">'+compass(boardSVG(CAND_YI,{showNum:S.showNum}))+'</div>'
+  +'<p class="muted" id="spinlab" style="margin-top:10px">'+t("end_spin")+'</p>'
+  +'<div class="stats" style="justify-content:center">'
+  +'<div class="stat"><div class="k">'+t("end_t1")+'</div><div class="v">'+fmtTime(Date.now()-(S.t0||Date.now()))+'</div></div>'
+  +'<div class="stat"><div class="k">'+t("end_t2")+'</div><div class="v">'+S.giveUps+' <small>'+t("end_unit")+'</small></div></div>'
+  +'<div class="stat"><div class="k">'+t("end_t3")+'</div><div class="v">'+S.bad+' <small>'+t("end_unit")+'</small></div></div></div>'
+  +'<p class="big" id="endline" style="opacity:0">'+t("end_line")+'</p><hr class="rule2">'
+  +'<p class="muted">'+tag("ke")+t("end_p1")+'</p>'
+  +'<p class="quote" style="text-align:left;display:inline-block">'+t("end_p2")+'</p>'
+  +'<div class="row" style="justify-content:center"><button class="btn ghost small" onclick="restart()">'+t("end_restart")+'</button></div></div>';
+}
+function startSpin(){
+  VARS=eightVariants(); spinIdx=0;
+  var n=0;
+  spinTimer=setInterval(function(){
+    var b=el("spin"); if(!b){ clearInterval(spinTimer); spinTimer=null; return; }
+    n++;
+    if(n>=9){
+      clearInterval(spinTimer); spinTimer=null;
+      b.style.opacity=1; b.innerHTML=compass(boardSVG(CAND_YI,{showNum:S.showNum}));
+      var lb=el("spinlab"); if(lb) lb.textContent=t("end_stop");
+      var ln=el("endline"); if(ln){ ln.classList.add("softin"); ln.style.opacity=1; }
+      return;
+    }
+    spinIdx=(spinIdx+1)%8;
+    b.style.transition="opacity .18s"; b.style.opacity=.25;
+    setTimeout(function(){
+      var b2=el("spin"); if(!b2) return;
+      b2.innerHTML=compass(boardSVG(gridToCells(VARS[spinIdx]),{showNum:S.showNum}));
+      b2.style.opacity=1;
+    },180);
+  },620);
+}
+function restart(){
+  if(spinTimer){clearInterval(spinTimer);spinTimer=null;}
+  if(ringTimer){clearInterval(ringTimer);ringTimer=null;}
+  S.scene="a1_intro"; S.why=null;
+  S.wall={}; S.wallTool="yang"; S.wangStage=0; S.yinUnlocked=false;
+  S.castIdx=0; S.castOut={}; S.castGot={}; S.comboSel={}; S.splitDone=false; S.splitTried={}; S.decomp={};
+  S.plus={};
+  S.link={}; S.linkSel=null; S.cells={}; S.tray=[]; S.sel=null;
+  S.giveUps=0; S.bad=0; S.t0=null; S.autoDone=false; S.sums={}; S.settled=false; S.built=null; S.ringStep=-1;
+  render();
+}
+
+/* =========================================================
+   7 · 路由 · 语言 · 渲染
+   ========================================================= */
+var ACT_OF={a1_intro:1,a1_wall:1,a1_cast:1,a1_fin:1,a2_main:2,
+  a3_intro:3,a3_s1:3,a3_s2:3,a3_s3:3,a3_s4:3,a3_s5:3,a3_end:3};
+var DOTSEQ={
+  1:["a1_intro","a1_wall","a1_cast","a1_fin"],
+  2:["a2_main"],
+  3:["a3_intro","a3_s1","a3_s2","a3_s3","a3_s4","a3_s5","a3_end"]
+};
+var SUBK={a1_intro:"a1sub0",a1_wall:"a1sub1",a1_cast:"a1sub2",a1_fin:"a1sub3",
+  a2_main:"a2sub",a3_intro:"a3sub0",a3_s1:"a3sub1",a3_s2:"a3sub2",a3_s3:"a3sub3",
+  a3_s4:"a3sub4",a3_s5:"a3sub5",a3_end:"a3sub6"};
+
+function go(scene){ S.scene=scene; render(); window.scrollTo({top:0,behavior:"smooth"}); }
+var HTML_LANG={zh:"zh-Hans",hant:"zh-Hant-HK",en:"en"};
+function applyLang(){
+  document.body.className=(LANG==="en")?"en":"";
+  document.documentElement.lang=HTML_LANG[LANG]||"zh-Hans";
+}
+function setLang(code){
+  if(!L[code]||code===LANG) return;
+  LANG=code;
+  try{ localStorage.setItem("hltl_lang",code); }catch(e){}
+  applyLang();
+  render();
+}
+function renderChrome(){
+  el("gtitle").textContent=t("gtitle");
+  var ib=el("installbtn"); if(ib) ib.textContent=t("installBtn");
+  var sw=el("langsw").getElementsByTagName("button");
+  for(var q=0;q<sw.length;q++) sw[q].className=(sw[q].getAttribute("data-l")===LANG)?"on":"";
+  var a=ACT_OF[S.scene]||1;
+  el("actbar").innerHTML=[1,2,3].map(function(i){
+    return '<div class="'+(i===a?"on":(i<a?"done":""))+'">'+t("act"+i)+'</div>';
+  }).join("");
+  var seq=DOTSEQ[a], idx=seq.indexOf(S.scene), h="";
+  for(var k=0;k<seq.length;k++) h+='<i class="'+(k===idx?"on":(k<idx?"done":""))+'"></i>';
+  el("dots").innerHTML=h;
+  el("subtitle").textContent=t(SUBK[S.scene]||"");
+}
+function render(){
+  if(spinTimer&&S.scene!=="a3_end"){ clearInterval(spinTimer); spinTimer=null; }
+  var h="";
+  switch(S.scene){
+    case "a1_intro": h=a1Intro(); break;
+    case "a1_wall":  h=a1Wall();  break;
+    case "a1_cast":  h=a1Cast();  break;
+    case "a1_fin":   h=a1Fin();   break;
+    case "a2_main":  h=a2Main();  break;
+    case "a3_intro": h=a3Intro(); break;
+    case "a3_s1":    h=a3S1();    break;
+    case "a3_s2":    h=a3S2();    break;
+    case "a3_s3":    h=a3S3();    break;
+    case "a3_s4":    h=a3S4();    break;
+    case "a3_s5":    h=a3S5();    break;
+    default:         h=a3End();
+  }
+  app.innerHTML=h;
+  renderChrome();
+  if(S.scene==="a1_wall") bindWall();
+  if(S.scene==="a1_cast") bindCast();
+  if(S.scene==="a1_fin"){
+    var box=el("ringbox");
+    if(box) box.innerHTML=compass(fiveSVG(castGotBoard(),{ring:S.ringStep,seasons:true}));
+    if(S.ringStep>=4){
+      var lb=el("ringlab"); if(lb) lb.style.opacity=1;
+      var tl=el("ringtail"); if(tl) tl.style.display="block";
+    } else if(!ringTimer) startRing();
+  }
+  if(S.scene==="a3_s1") bindWx();
+  if(S.scene==="a3_s2"||S.scene==="a3_s3") bindBoard();
+  if(S.scene==="a3_s5"){
+    bindSums();
+    if(allSummed("jia")&&allSummed("yi")&&!S.settled){
+      setTimeout(function(){ if(S.scene==="a3_s5"&&!S.settled){ S.settled=true; render(); } },1100);
+    }
+  }
+  if(S.scene==="a3_end"&&!spinTimer) startSpin();
+}
+function bindBoard(){
+  var chips=document.querySelectorAll(".chip");
+  for(var i=0;i<chips.length;i++){
+    (function(c){
+      c.addEventListener("click",function(){
+        var n=parseInt(c.getAttribute("data-n"),10);
+        S.sel=(S.sel===n)?null:n; render();
+      });
+      c.addEventListener("dragstart",function(e){
+        var n=parseInt(c.getAttribute("data-n"),10); S.sel=n;
+        try{ e.dataTransfer.setData("text/plain",String(n)); e.dataTransfer.effectAllowed="move"; }catch(err){}
+      });
+    })(chips[i]);
+  }
+  var hits=document.querySelectorAll(".hit");
+  for(var j=0;j<hits.length;j++){
+    (function(hh){
+      var slot=hh.getAttribute("data-slot");
+      hh.addEventListener("click",function(){ if(S.sel!=null) place(slot); else pickUp(slot); });
+      hh.addEventListener("dragover",function(e){ e.preventDefault(); try{e.dataTransfer.dropEffect="move";}catch(err){} });
+      hh.addEventListener("drop",function(e){
+        e.preventDefault();
+        var n=null;
+        try{ n=parseInt(e.dataTransfer.getData("text/plain"),10); }catch(err){}
+        if(!isNaN(n)&&n) S.sel=n;
+        if(S.sel!=null) place(slot);
+      });
+    })(hits[j]);
+  }
+}
+applyLang();
+render();
+
+/* ===== PWA: service worker + install prompt ===== */
+var deferredPrompt=null;
+window.addEventListener("beforeinstallprompt",function(e){
+  e.preventDefault(); deferredPrompt=e;
+  var b=el("installbtn"); if(b) b.className="installbtn show";
+});
+window.addEventListener("appinstalled",function(){
+  deferredPrompt=null;
+  var b=el("installbtn"); if(b) b.className="installbtn";
+});
+function doInstall(){
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(function(){
+    deferredPrompt=null;
+    var b=el("installbtn"); if(b) b.className="installbtn";
+  });
+}
+if("serviceWorker" in navigator && location.protocol!=="file:"){
+  window.addEventListener("load",function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  });
+}
+</script>
+</body>
+</html>

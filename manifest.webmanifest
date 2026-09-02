@@ -1,0 +1,22 @@
+{
+  "name": "「发明」河图洛书 · Invent the Lo Shu",
+  "short_name": "河图洛书",
+  "description": "An interactive three-act game about inventing the He Tu / Lo Shu magic square. 繁體 · 简体 · English.",
+  "lang": "zh-Hans",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "id": "/hetu-luoshu/",
+  "display": "standalone",
+  "display_override": ["standalone", "fullscreen", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#f4efe4",
+  "theme_color": "#f4efe4",
+  "categories": ["games", "education"],
+  "icons": [
+    { "src": "icons/icon-192.png",     "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png",     "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
