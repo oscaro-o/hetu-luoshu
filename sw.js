@@ -1,5 +1,5 @@
 /* 河图洛书 PWA service worker — app-shell cache, offline-first */
-var VERSION = "v2";
+var VERSION = "v3";
 var CACHE = "hetu-luoshu-" + VERSION;
 var SHELL = [
   "./",
