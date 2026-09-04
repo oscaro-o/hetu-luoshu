@@ -94,15 +94,17 @@ BEGIN {
   if (!(sid in sfirst) || epoch < sfirst[sid]) sfirst[sid] = epoch
   if (epoch > slast[sid]) slast[sid] = epoch
 
-  if (ev == "load") {
+  # load 派生的统计一律按会话去重：重新加载页面会再发一次 load，同一个 sid 只算一次。
+  # 语言也放在这里，保证它和会话数用同一个分母。
+  if (ev == "load" && !(sid in loadseen)) {
+    loadseen[sid] = 1
     r = qval(q, "r"); if (r == "") r = "unknown"
-    if (!(sid in refseen)) { refseen[sid] = 1; REF[r]++ }
+    REF[r]++
     if (qval(q, "n") == "1") NEWV++
     if (qval(q, "m") == "pwa") PWA++
     u = qval(q, "u"); if (u != "") UTM[u]++
+    l = qval(q, "l"); if (l != "") LANGC[l]++
   }
-  l = qval(q, "l")
-  if (l != "" && !(sid in langseen)) { langseen[sid] = 1; LANGC[l]++ }
   if (ev == "done") {
     DONE_AT[sid] = epoch
     sr = qval(q, "r"); if (sr != "") { SOLO_SUM += sr; SOLO_N++ }
