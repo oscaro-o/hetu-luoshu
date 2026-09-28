@@ -249,6 +249,27 @@ hr.rule2{border:none;border-top:1px solid var(--line);margin:26px 0}
   header.top{gap:8px}
   .langsw button{padding:4px 9px}
 }
+
+/* ---------------------------------------------------------------
+   trilumi signature — one lockup, four games.
+   The mark and the wordmark are copied from the header of trilumi.xyz
+   so the family reads as one publisher rather than four orphans.
+   Deliberately not translated: a mark that changes with the interface
+   language is not a mark.
+   --------------------------------------------------------------- */
+.tribrand{display:flex;align-items:center;justify-content:center;gap:9px;
+  margin:40px auto 4px;padding-top:14px;border-top:1px solid var(--line);
+  font-family:"Segoe UI",Helvetica,Arial,"Microsoft YaHei","PingFang SC",
+    "Hiragino Sans GB",sans-serif;line-height:1;text-decoration:none;
+  opacity:.72;transition:opacity .18s ease;-webkit-tap-highlight-color:transparent}
+.tribrand:hover,.tribrand:focus-visible{opacity:1}
+.tribrand svg{display:block;flex:none;width:11px;height:11.7px;fill:#004AAD}
+.tribrand .tbn{font-size:11px;font-weight:700;letter-spacing:.22em;color:#004AAD;
+  padding-left:.11em}
+.tribrand .tbu{font-size:11px;font-weight:400;letter-spacing:.02em;color:var(--ink3)}
+.tribrand .tbu::before{content:"·";margin:0 9px;color:var(--ink3)}
+@media (max-width:430px){.tribrand{flex-wrap:wrap;gap:5px}
+  .tribrand .tbu::before{margin:0 6px}}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#f4efe4" media="(prefers-color-scheme: light)">
@@ -282,6 +303,11 @@ hr.rule2{border:none;border-top:1px solid var(--line);margin:26px 0}
     <button type="button" class="aboutbtn" id="aboutbtn" onclick="toggleAbout()"></button>
     <div class="aboutbox" id="aboutbox"></div>
   </footer>
+  <a class="tribrand" href="https://trilumi.xyz/games/" target="_blank" rel="noopener">
+    <svg viewBox="0 0 100 106" aria-hidden="true" focusable="false"><polygon points="57,0 68.5,21 40,76 18,76"></polygon><polygon points="9,80 63,80 73,98 0,98"></polygon><polygon points="66,33 55,55 79,106 100,106"></polygon></svg>
+    <span class="tbn">TRILUMI</span>
+    <span class="tbu">trilumi.xyz/games</span>
+  </a>
 </div>
 
 <script>
@@ -363,6 +389,7 @@ L.zh = {
   a1w_say2:"七天，中间空了三天。这次我看懂了。",
   a1w_tool_yang:"有", a1w_tool_yin:"无",
   a1w_done:"你刚刚发明了两个东西。",
+  end_share:"生成分享卡",
   a1w_rev:"○ 在上，明，动。你叫它 <strong>阳</strong>。<br>● 在下，暗，静。你叫它 <strong>阴</strong>。",
   a1w_rev2:"顺带一提：往后你会发现，○ 天然配奇数，● 天然配偶数。这不是规定，是你刚才自己那么用的。",
 
@@ -533,6 +560,7 @@ L.hant = {
   a1w_say2:"七天，中間空了三天。這次我看懂了。",
   a1w_tool_yang:"有", a1w_tool_yin:"無",
   a1w_done:"你剛剛發明了兩個東西。",
+  end_share:"產生分享卡片",
   a1w_rev:"○ 在上，明，動。你叫它 <strong>陽</strong>。<br>● 在下，暗，靜。你叫它 <strong>陰</strong>。",
   a1w_rev2:"順帶一提：往後你會發現，○ 天然配奇數，● 天然配偶數。這不是規定，是你剛才自己那麼用的。",
 
@@ -702,6 +730,7 @@ L.en = {
   a1w_say2:"Seven days, three of them empty in the middle. This time I can read it.",
   a1w_tool_yang:"something", a1w_tool_yin:"nothing",
   a1w_done:"You have just invented two things.",
+  end_share:"Make a share card",
   a1w_rev:"○ is above, bright, moving. You call it <strong>yang</strong>.<br>● is below, dark, still. You call it <strong>yin</strong>.",
   a1w_rev2:"One more thing you'll notice later: ○ naturally goes with odd numbers, ● with even. Nobody decreed that. It is simply how you just used them.",
 
@@ -1595,7 +1624,9 @@ function a3End(){
   +'<p class="big" id="endline" style="opacity:0">'+t("end_line")+'</p><hr class="rule2">'
   +'<p class="muted">'+tag("ke")+t("end_p1")+'</p>'
   +'<p class="quote" style="text-align:left;display:inline-block">'+t("end_p2")+'</p>'
-  +'<div class="row" style="justify-content:center"><button class="btn ghost small" onclick="restart()">'+t("end_restart")+'</button></div></div>';
+  +'<div class="row" style="justify-content:center;gap:10px">'
+  +'<button class="btn ghost small" onclick="shareCard()">'+t("end_share")+'</button>'
+  +'<button class="btn ghost small" onclick="restart()">'+t("end_restart")+'</button></div></div>';
 }
 function startSpin(){
   VARS=eightVariants(); spinIdx=0;
@@ -1841,6 +1872,603 @@ if("serviceWorker" in navigator && location.protocol!=="file:"){
   window.addEventListener("load",function(){
     navigator.serviceWorker.register("sw.js").catch(function(){});
   });
+}
+
+/* ==========================================================================
+   TRILUMI — brand signature
+   --------------------------------------------------------------------------
+   The lockup is copied from the header of trilumi.xyz, which is the
+   authoritative source:
+
+     mark   three polygons in a 100 x 106 box, painted in one colour
+     word   "TRILUMI", uppercase, letter-spacing .22em
+
+   Both are redrawn by hand here for two reasons: a canvas share card and the
+   page itself must use the same geometry, and every game has to stay a single
+   file with no dependencies.
+
+   Nothing in this block is translated. A brand mark that changes with the
+   interface language is not a brand mark.
+   ========================================================================== */
+var TRILUMI = (function () {
+  var BLUE = '#004AAD';
+  var HREF = 'https://trilumi.xyz/games/';
+  var SANS = '"Segoe UI","Helvetica Neue",Helvetica,"Microsoft YaHei",' +
+             '"PingFang SC","Hiragino Sans GB",Arial,sans-serif';
+
+  /* the three polygons, in the official 100 x 106 space */
+  var POLY = [
+    [[57, 0], [68.5, 21], [40, 76], [18, 76]],
+    [[9, 80], [63, 80], [73, 98], [0, 98]],
+    [[66, 33], [55, 55], [79, 106], [100, 106]]
+  ];
+
+  function path(c, x, y, h, color) {
+    var s = h / 106;
+    c.save();
+    c.translate(x, y);
+    c.scale(s, s);
+    c.fillStyle = color || BLUE;
+    c.beginPath();
+    for (var i = 0; i < 3; i++) {
+      var p = POLY[i];
+      c.moveTo(p[0][0], p[0][1]);
+      for (var j = 1; j < p.length; j++) c.lineTo(p[j][0], p[j][1]);
+      c.closePath();
+    }
+    c.fill();
+    c.restore();
+  }
+
+  function rr(c, x, y, w, h, r) {
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.lineTo(x + w - r, y); c.quadraticCurveTo(x + w, y, x + w, y + r);
+    c.lineTo(x + w, y + h - r); c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    c.lineTo(x + r, y + h); c.quadraticCurveTo(x, y + h, x, y + h - r);
+    c.lineTo(x, y + r); c.quadraticCurveTo(x, y, x + r, y);
+    c.closePath();
+  }
+
+  /* The badge — the form that travels. A share card gets forwarded into chat
+     apps and shown as a thumbnail a few hundred pixels wide, so the mark has
+     to survive being scaled down and re-compressed. A solid blue square with
+     white cut-outs does; a hairline of blue polygons does not. */
+  function badge(c, x, y, size) {
+    rr(c, x, y, size, size, size * 0.22);
+    c.fillStyle = BLUE;
+    c.fill();
+    var inner = size * 0.60;
+    path(c, x + (size - inner * 100 / 106) / 2, y + (size - inner) / 2, inner, '#fff');
+  }
+
+  /* "TRILUMI", uppercase, letterspaced. Canvas has no letter-spacing, so the
+     glyphs go down one at a time. Returns the advance width. */
+  function word(c, x, y, size, color, ls) {
+    ls = (ls == null) ? 0.22 : ls;
+    var sp = size * ls, tx = x, s = 'TRILUMI';
+    c.save();
+    c.font = '700 ' + size + 'px ' + SANS;
+    c.fillStyle = color || BLUE;
+    for (var i = 0; i < s.length; i++) {
+      c.fillText(s[i], tx, y);
+      tx += c.measureText(s[i]).width + sp;
+    }
+    c.restore();
+    return tx - sp - x;
+  }
+
+  function wordW(c, size, ls) {
+    ls = (ls == null) ? 0.22 : ls;
+    var w = 0, s = 'TRILUMI';
+    c.save();
+    c.font = '700 ' + size + 'px ' + SANS;
+    for (var i = 0; i < s.length; i++) w += c.measureText(s[i]).width + size * ls;
+    c.restore();
+    return w - size * ls;
+  }
+
+  /* The lockup on a share card: badge + wordmark on one line, the series
+     address under it. Returns the width used, so the caller can right-align
+     the game's own line against it without the two ever colliding. */
+  function stamp(c, x, y, opts) {
+    opts = opts || {};
+    var bs = opts.badge || 34;
+    var ws = opts.word || 19;
+    var gap = opts.gap || 15;
+    badge(c, x, y, bs);
+    var cy = y + bs / 2 + ws * 0.36;
+    var w = bs + gap + word(c, x + bs + gap, cy, ws, opts.color || BLUE);
+    if (opts.url !== false) {
+      c.save();
+      c.font = '400 ' + Math.round(ws * 0.82) + 'px ' + SANS;
+      c.fillStyle = opts.muted || '#8c8478';
+      c.fillText('trilumi.xyz/games', x, y + bs + ws * 1.16);
+      c.restore();
+    }
+    return w;
+  }
+
+  return {
+    BLUE: BLUE, HREF: HREF, SANS: SANS,
+    path: path, badge: badge, word: word, wordW: wordW, rr: rr, stamp: stamp
+  };
+})();
+
+/* ==========================================================================
+   TRICARD — one share-card renderer for the whole family
+   --------------------------------------------------------------------------
+   The first two games each grew their own card code. That does not scale to
+   four, and it guarantees the four cards drift apart. This is the single
+   renderer: a game hands over a plain description of what is on its card and
+   gets a canvas back.
+
+   Depends on TRILUMI for the brand stamp. Everything else is self-contained.
+
+     TRICARD.draw({
+       paper, ink, accent, muted, line, panel, panelInk,   // palette
+       serif, sans,                                        // font stacks
+       kicker,                                             // small caps line
+       title, body,                                        // wrapped + fitted
+       stats: [{k, v}],                                    // 2-4 inline
+       quote,                                              // dark panel
+       footer,                                             // game's own line
+       mark: function (c, x, y, h) {}                      // optional game mark
+     })
+
+   Returns a canvas. The caller downloads it.
+
+   Layout rule: the card is a fixed 1080 wide and grows downwards. Every block
+   is measured before anything is painted, so the canvas is created at the
+   height the content actually needs — a game cannot overflow by handing over
+   a long string. Titles WRAP rather than shrink; a long title set small to
+   stay on one line reads as a mistake, a long title set on three lines reads
+   as a title.
+   ========================================================================== */
+var TRICARD = (function () {
+  var W = 1080;
+  var PAD = 96;
+  var MAXW = W - PAD * 2;
+
+  /* closing punctuation must not be pushed to the start of a line */
+  var NO_START = '。，、；：？！）》」』】”’…·.,;:?!)]}';
+
+  /* CJK glyphs break anywhere; Latin words stay whole */
+  function tokens(s) {
+    var out = [], buf = '';
+    for (var i = 0; i < s.length; i++) {
+      var ch = s[i];
+      if (/[\u3000-\u303f\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff00-\uffef]/.test(ch)) {
+        if (buf) { out.push(buf); buf = ''; }
+        out.push(ch);
+      } else if (ch === ' ' || ch === '\n') {
+        if (buf) { out.push(buf); buf = ''; }
+        out.push(ch);
+      } else {
+        buf += ch;
+      }
+    }
+    if (buf) out.push(buf);
+    return out;
+  }
+
+  function wrapLines(c, text, maxW) {
+    var tk = tokens(String(text || '')), lines = [], cur = '';
+    for (var i = 0; i < tk.length; i++) {
+      var t = tk[i];
+      if (t === '\n') { lines.push(cur); cur = ''; continue; }
+      var test = cur + t;
+      if (cur && c.measureText(test).width > maxW) {
+        /* never open a line with closing punctuation — pull it back down */
+        if (NO_START.indexOf(t) >= 0) {
+          lines.push(cur + t);
+          cur = '';
+          continue;
+        }
+        lines.push(cur);
+        cur = (t === ' ') ? '' : t;
+      } else {
+        cur = test;
+      }
+    }
+    if (cur) lines.push(cur);
+    return lines;
+  }
+
+  /* canvas has no letter-spacing */
+  function spaced(c, text, x, y, sp) {
+    var tx = x;
+    for (var i = 0; i < text.length; i++) {
+      c.fillText(text[i], tx, y);
+      tx += c.measureText(text[i]).width + sp;
+    }
+    return tx - sp - x;
+  }
+
+  function fitOneLine(c, text, weight, stack, max, min, maxW, step) {
+    var s = max;
+    while (s > min) {
+      c.font = weight + ' ' + s + 'px ' + stack;
+      if (c.measureText(text).width <= maxW) break;
+      s -= (step || 1);
+    }
+    c.font = weight + ' ' + s + 'px ' + stack;
+    return s;
+  }
+
+  /* wrap to at most `maxLines`, shrinking the type until it fits that budget */
+  function fitBlock(c, text, weight, stack, max, min, maxW, maxLines, step) {
+    var s = max, lines = [];
+    while (s >= min) {
+      c.font = weight + ' ' + s + 'px ' + stack;
+      lines = wrapLines(c, text, maxW);
+      if (lines.length <= maxLines) break;
+      s -= (step || 2);
+    }
+    if (lines.length > maxLines) {
+      lines = lines.slice(0, maxLines);
+      lines[maxLines - 1] = lines[maxLines - 1].replace(/\s*\S{0,4}$/, '') + '…';
+    }
+    c.font = weight + ' ' + s + 'px ' + stack;
+    return { size: s, lines: lines };
+  }
+
+  function draw(spec) {
+    var c = document.createElement('canvas').getContext('2d');
+    var serif = spec.serif, sans = spec.sans;
+    var ink = spec.ink || '#191713';
+    var accent = spec.accent || '#a8542a';
+    var muted = spec.muted || '#8c8478';
+    var line = spec.line || '#e2dbcf';
+    var paper = spec.paper || '#f7f4ef';
+    var bodyInk = spec.bodyInk || '#4c463d';
+    var ls = spec.ls == null ? 3.2 : spec.ls;
+
+    var stats = spec.stats || [];
+    var quote = spec.quote || '';
+    var footer = spec.footer || '';
+
+    /* ================= layout pass — nothing is painted yet ============== */
+
+    /* title: wrapped, then shrunk until it fits three lines */
+    var T = fitBlock(c, spec.title || '', '700', serif, 104, 44, MAXW, 3, 2);
+    var tLh = Math.round(T.size * 1.16);
+    var tBase = 182 + 56 + Math.round(T.size * 0.72);
+    var tBottom = tBase + (T.lines.length - 1) * tLh;
+
+    /* body: wrapped, at most five lines */
+    var B = fitBlock(c, spec.body || '', '400', serif, 32, 21, MAXW, 5, 1);
+    var bLh = Math.round(B.size * 1.62);
+    var bBase = tBottom + 46 + Math.round(B.size * 0.72);
+    var bBottom = bBase + (B.lines.length - 1) * bLh;
+
+    /* stats: one inline row, shrunk to fit the column */
+    var statBase = 0, statSize = 0, statLine = '';
+    var y = bBottom;
+    if (stats.length) {
+      statLine = stats.map(function (s) { return s.k + ' ' + s.v; }).join('   ·   ');
+      statSize = fitOneLine(c, statLine, '600', sans, 28, 15, MAXW, 1);
+      statBase = bBottom + 34 + Math.round(statSize * 0.78);
+      y = statBase;
+    }
+
+    /* quote: a dark panel */
+    var Q = null;
+    if (quote) {
+      var qPad = 54;
+      Q = fitBlock(c, quote, '400', serif, 44, 24, MAXW - qPad * 2, 4, 2);
+      Q.lh = Math.round(Q.size * 1.45);
+      Q.pad = qPad;
+      Q.top = y + 96;
+      Q.h = qPad * 2 + (Q.lines.length - 1) * Q.lh;
+      y = Q.top + Q.h;
+    }
+
+    /* footer band: badge + wordmark, with the game's own line on the right */
+    var fTop = y + 104;
+    var fH = 34 + 19 * 1.16 + 8;
+    var H = Math.round(fTop + fH + 74);
+    if (H < 900) H = 900;
+
+    /* ================= paint pass ======================================== */
+    var cv = c.canvas;
+    cv.width = W; cv.height = H;
+    c = cv.getContext('2d');
+
+    c.fillStyle = paper; c.fillRect(0, 0, W, H);
+    c.strokeStyle = line; c.lineWidth = 2;
+    c.strokeRect(20, 20, W - 40, H - 40);
+
+    /* the game's own mark, top right */
+    if (typeof spec.mark === 'function') {
+      c.save();
+      spec.mark(c, W - PAD - 78, 106, 36);
+      c.restore();
+    }
+
+    /* kicker */
+    c.font = '700 23px ' + sans;
+    c.fillStyle = accent;
+    spaced(c, String(spec.kicker || '').toUpperCase(), PAD, 132, ls);
+    c.strokeStyle = line; c.lineWidth = 2;
+    c.beginPath(); c.moveTo(PAD, 182); c.lineTo(W - PAD, 182); c.stroke();
+
+    /* title */
+    c.font = '700 ' + T.size + 'px ' + serif;
+    c.fillStyle = ink;
+    T.lines.forEach(function (ln, i) { c.fillText(ln, PAD, tBase + i * tLh); });
+
+    /* body */
+    c.font = '400 ' + B.size + 'px ' + serif;
+    c.fillStyle = bodyInk;
+    B.lines.forEach(function (ln, i) { c.fillText(ln, PAD, bBase + i * bLh); });
+
+    /* stats */
+    if (stats.length) {
+      c.font = '600 ' + statSize + 'px ' + sans;
+      c.fillStyle = bodyInk;
+      c.fillText(statLine, PAD, statBase);
+    }
+
+    /* quote panel */
+    if (Q) {
+      c.strokeStyle = line; c.lineWidth = 2;
+      c.beginPath(); c.moveTo(PAD, Q.top - 64); c.lineTo(W - PAD, Q.top - 64); c.stroke();
+
+      TRILUMI.rr(c, PAD, Q.top, MAXW, Q.h, 6);
+      c.fillStyle = spec.panel || '#191713';
+      c.fill();
+
+      c.font = '400 ' + Q.size + 'px ' + serif;
+      c.fillStyle = spec.panelInk || '#f2ece2';
+      Q.lines.forEach(function (ln, i) {
+        c.fillText(ln, PAD + Q.pad, Q.top + Q.pad + Math.round(Q.size * 0.92) + i * Q.lh);
+      });
+    }
+
+    /* footer: the publisher left, the game's own line right */
+    c.strokeStyle = line; c.lineWidth = 2;
+    c.beginPath(); c.moveTo(PAD, fTop - 30); c.lineTo(W - PAD, fTop - 30); c.stroke();
+
+    var stampW = TRILUMI.stamp(c, PAD, fTop, { badge: 34, word: 19, muted: muted });
+    if (footer) {
+      c.font = '400 20px ' + sans;
+      c.fillStyle = muted;
+      var fl = wrapLines(c, footer, MAXW - stampW - 60).slice(-2);
+      var fy = fTop + 34 + (fl.length > 1 ? -8 : 10);
+      fl.forEach(function (ln, i) {
+        c.fillText(ln, W - PAD - c.measureText(ln).width, fy + i * 28);
+      });
+    }
+
+    return cv;
+  }
+
+  /* plain-text twin, for the clipboard button */
+  function text(spec) {
+    var out = [spec.kicker, '', spec.title];
+    if (spec.body) out.push('', spec.body);
+    if (spec.stats && spec.stats.length) {
+      out.push('', spec.stats.map(function (s) { return s.k + ' ' + s.v; }).join('  ·  '));
+    }
+    if (spec.quote) out.push('', spec.quote);
+    if (spec.footer) out.push('', spec.footer);
+    out.push('', 'trilumi.xyz/games');
+    return out.join('\n');
+  }
+
+  /* download / share, wired the same way in every game */
+  function save(cv, filename, onDone, onFail) {
+    function go(href, revoke) {
+      var a = document.createElement('a');
+      a.href = href; a.download = filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      if (revoke) setTimeout(function () { URL.revokeObjectURL(href); }, 2000);
+      if (onDone) onDone();
+    }
+    try {
+      if (cv.toBlob) {
+        cv.toBlob(function (b) { go(URL.createObjectURL(b), true); }, 'image/png');
+      } else {
+        go(cv.toDataURL('image/png'), false);
+      }
+    } catch (e) { if (onFail) onFail(e); }
+  }
+
+  function copy(txt, ok, fail) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(ok, function () { legacy(txt, ok, fail); });
+    } else {
+      legacy(txt, ok, fail);
+    }
+  }
+
+  function legacy(txt, ok, fail) {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = txt;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+      document.body.appendChild(ta);
+      ta.select(); ta.setSelectionRange(0, txt.length);
+      var done = document.execCommand('copy');
+      ta.remove();
+      done ? ok() : fail();
+    } catch (e) { fail(); }
+  }
+
+  return {
+    draw: draw, text: text, save: save, copy: copy,
+    wrapLines: wrapLines, fitBlock: fitBlock, W: W, PAD: PAD
+  };
+})();
+
+/* ==========================================================================
+   TRISHARE — one share sheet for the whole family
+   --------------------------------------------------------------------------
+   The card has to be *seen* before it is saved. On a phone, saving means
+   long-pressing the image, and you cannot long-press a download. So the sheet
+   shows the PNG, then offers the three ways out: save, copy the text, close.
+
+   Depends on TRICARD for the card itself. Styling is deliberately neutral so
+   it sits on top of a warm-paper game or a cold-green one without clashing.
+   ========================================================================== */
+var TRISHARE = (function () {
+  var STYLE =
+    '.trish{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;' +
+      'justify-content:center;padding:16px;background:rgba(12,11,10,.74)}' +
+    '.trish .box{background:#fbf9f4;border-radius:10px;width:100%;max-width:520px;' +
+      'max-height:93vh;overflow:auto;padding:18px 18px 14px;' +
+      'box-shadow:0 24px 64px rgba(0,0,0,.4);' +
+      'font-family:"Segoe UI",Helvetica,Arial,system-ui,sans-serif}' +
+    '.trish h3{margin:0 0 3px;font-size:15px;font-weight:700;color:#23201c}' +
+    '.trish .hint{margin:0 0 12px;font-size:12.5px;line-height:1.6;color:#7d7566}' +
+    '.trish .cvwrap{border:1px solid #e2dbcf;border-radius:6px;overflow:hidden;' +
+      'background:#fff;line-height:0}' +
+    '.trish img{display:block;width:100%;height:auto}' +
+    '.trish .acts{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}' +
+    '.trish button{flex:1 1 120px;padding:11px 12px;border-radius:6px;' +
+      'border:1px solid #cfc4ad;background:#fff;color:#23201c;font:inherit;' +
+      'font-size:13px;font-weight:600;cursor:pointer}' +
+    '.trish button.p{background:#004AAD;border-color:#004AAD;color:#fff}' +
+    '.trish button.w{flex-basis:100%}' +
+    '.trish .tg{margin-top:9px;min-height:16px;font-size:12px;color:#3d6b4a}' +
+    '.trish .tg.bad{color:#a8321e}';
+
+  var injected = false;
+  function inject() {
+    if (injected) return;
+    var s = document.createElement('style');
+    s.textContent = STYLE;
+    document.head.appendChild(s);
+    injected = true;
+  }
+
+  /* strings, in the three languages the family ships. A game may override
+     any of them through opts. */
+  var T = {
+    en:   { title: 'Your card', hint: 'Long-press the image to save it, or use Download.',
+            dl: 'Download PNG', cp: 'Copy as text', cl: 'Close',
+            ok: 'Copied to clipboard', bad: 'Could not copy — select the text manually.' },
+    hans: { title: '你的结果卡片', hint: '长按图片保存，或点下面的下载。',
+            dl: '下载图片', cp: '复制文字', cl: '关闭',
+            ok: '已复制到剪贴板', bad: '复制失败，请手动选中文字。' },
+    hant: { title: '你的結果卡片', hint: '長按圖片儲存，或點下面的下載。',
+            dl: '下載圖片', cp: '複製文字', cl: '關閉',
+            ok: '已複製到剪貼簿', bad: '複製失敗，請手動選取文字。' }
+  };
+
+  function open(cv, txt, opts) {
+    opts = opts || {};
+    inject();
+    var L = T[opts.lang] || T.en;
+    var say = function (k) { return opts[k] || L[k]; };
+
+    var m = document.createElement('div');
+    m.className = 'trish';
+    m.innerHTML =
+      '<div class="box">' +
+        '<h3>' + say('title') + '</h3>' +
+        '<p class="hint">' + say('hint') + '</p>' +
+        '<div class="cvwrap"></div>' +
+        '<div class="acts">' +
+          '<button class="p" data-a="dl">' + say('dl') + '</button>' +
+          '<button data-a="cp">' + say('cp') + '</button>' +
+          '<button class="w" data-a="cl">' + say('cl') + '</button>' +
+        '</div>' +
+        '<p class="tg"></p>' +
+      '</div>';
+
+    var url;
+    try { url = cv.toDataURL('image/png'); } catch (e) { url = ''; }
+    if (url) {
+      var img = document.createElement('img');
+      img.src = url;
+      img.alt = say('title');
+      m.querySelector('.cvwrap').appendChild(img);
+    }
+
+    var tg = m.querySelector('.tg');
+    function note(msg, bad) {
+      tg.textContent = msg;
+      tg.className = 'tg' + (bad ? ' bad' : '');
+    }
+
+    m.querySelector('[data-a="dl"]').onclick = function () {
+      TRICARD.save(cv, opts.filename || 'trilumi-card.png', function () {
+        note(say('ok'));
+      }, function () {
+        note(say('bad'), true);
+      });
+    };
+    m.querySelector('[data-a="cp"]').onclick = function () {
+      TRICARD.copy(txt, function () { note(say('ok')); },
+                        function () { note(say('bad'), true); });
+    };
+    m.querySelector('[data-a="cl"]').onclick = function () { close(); };
+    m.onclick = function (e) { if (e.target === m) close(); };
+    function onKey(e) { if (e.key === 'Escape') close(); }
+    document.addEventListener('keydown', onKey);
+
+    function close() {
+      document.removeEventListener('keydown', onKey);
+      m.remove();
+    }
+
+    /* the native sheet, where the browser can hand a file to another app —
+       which on a phone is the actual sharing path */
+    try {
+      if (navigator.canShare && cv.toBlob) {
+        cv.toBlob(function (b) {
+          var f;
+          try { f = new File([b], opts.filename || 'trilumi-card.png', { type: 'image/png' }); }
+          catch (e) { return; }
+          if (!navigator.canShare({ files: [f] })) return;
+          var btn = document.createElement('button');
+          btn.textContent = opts.shareNative || 'Share';
+          btn.onclick = function () {
+            navigator.share({ files: [f], text: txt }).catch(function () {});
+          };
+          m.querySelector('.acts').insertBefore(btn, m.querySelector('[data-a="cl"]'));
+        }, 'image/png');
+      }
+    } catch (e) {}
+
+    document.body.appendChild(m);
+  }
+
+  return { open: open };
+})();
+
+/* ---- share card -----------------------------------------------------
+   Built from the same four numbers the end screen shows, so what a player
+   sends is what a player saw. Uses this game's own tracker — adding a second
+   one would double-count every event in the log. */
+function shareCard(){
+  var spec={
+    paper:"#f7f2e7", ink:"#1c1a17", accent:"#9e2b25",
+    muted:"#8a8073", line:"#d6cdb9", panel:"#1c1a17", panelInk:"#f2ece2",
+    serif:'"Songti SC","STSong","Noto Serif CJK SC",Georgia,serif',
+    sans:'"Segoe UI",Helvetica,"Microsoft YaHei",sans-serif',
+    kicker:t("gtitle"),
+    title:t("end_line"),
+    body:t("end_p1"),
+    stats:[
+      {k:t("end_t1"), v:fmtTime(Date.now()-(S.t0||Date.now()))},
+      {k:t("end_t2"), v:S.giveUps},
+      {k:t("end_t3"), v:S.bad},
+      {k:t("end_t4"), v:soloRate()+"%"}
+    ],
+    quote:t("end_p2"),
+    footer:t("end_restart"),
+    mark:function(c,x,y,h){TRILUMI.path(c,x,y,h,"#9e2b25");}
+  };
+  var cv=TRICARD.draw(spec);
+  TRISHARE.open(cv,TRICARD.text(spec),{
+    lang:(LANG==="hant")?"hant":(LANG==="en"?"en":"hans"),
+    filename:"hetu-luoshu.png"
+  });
+  track("share");
 }
 </script>
 </body>
