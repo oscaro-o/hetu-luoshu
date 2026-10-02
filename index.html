@@ -303,10 +303,10 @@ hr.rule2{border:none;border-top:1px solid var(--line);margin:26px 0}
     <button type="button" class="aboutbtn" id="aboutbtn" onclick="toggleAbout()"></button>
     <div class="aboutbox" id="aboutbox"></div>
   </footer>
-  <a class="tribrand" href="https://trilumi.xyz/games/" target="_blank" rel="noopener">
+  <a class="tribrand" href="https://academy.trilumi.xyz/" target="_blank" rel="noopener">
     <svg viewBox="0 0 100 106" aria-hidden="true" focusable="false"><polygon points="57,0 68.5,21 40,76 18,76"></polygon><polygon points="9,80 63,80 73,98 0,98"></polygon><polygon points="66,33 55,55 79,106 100,106"></polygon></svg>
     <span class="tbn">TRILUMI</span>
-    <span class="tbu">trilumi.xyz/games</span>
+    <span class="tbu">academy.trilumi.xyz</span>
   </a>
 </div>
 
@@ -1892,7 +1892,7 @@ if("serviceWorker" in navigator && location.protocol!=="file:"){
    ========================================================================== */
 var TRILUMI = (function () {
   var BLUE = '#004AAD';
-  var HREF = 'https://trilumi.xyz/games/';
+  var HREF = 'https://academy.trilumi.xyz/';
   var SANS = '"Segoe UI","Helvetica Neue",Helvetica,"Microsoft YaHei",' +
              '"PingFang SC","Hiragino Sans GB",Arial,sans-serif';
 
@@ -1983,7 +1983,7 @@ var TRILUMI = (function () {
       c.save();
       c.font = '400 ' + Math.round(ws * 0.82) + 'px ' + SANS;
       c.fillStyle = opts.muted || '#8c8478';
-      c.fillText('trilumi.xyz/games', x, y + bs + ws * 1.16);
+      c.fillText(opts.addr || 'academy.trilumi.xyz', x, y + bs + ws * 1.16);
       c.restore();
     }
     return w;
@@ -2253,7 +2253,7 @@ var TRICARD = (function () {
     }
     if (spec.quote) out.push('', spec.quote);
     if (spec.footer) out.push('', spec.footer);
-    out.push('', 'trilumi.xyz/games');
+    out.push('', 'academy.trilumi.xyz');
     return out.join('\n');
   }
 
