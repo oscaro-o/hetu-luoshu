@@ -1,0 +1,26 @@
+# Line endings: LF, in every checkout, on every machine.
+#
+# These games are served from a Linux box and deployed over ssh, so a CRLF is
+# either a wasted byte in every response or a shell script that will not run.
+#
+# This file has to exist rather than relying on a machine setting. PortableGit
+# on this machine ships `core.autocrlf=true` in its *system* config, which
+# rewrites every text file to CRLF on checkout. The working tree then stops
+# matching the blob — and since the deployed file IS the working-tree file, the
+# live byte count stops matching the repo. Permanently, and silently: git
+# normalises on commit, so `git status` reports the tree clean either way.
+#
+# "Compare the live size with the local size" is the first thing anyone does
+# when a deploy looks broken. A permanent false negative there costs a
+# debugging session every time it is trusted.
+* text=auto eol=lf
+
+*.sh text eol=lf
+*.py text eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
